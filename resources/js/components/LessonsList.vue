@@ -1,124 +1,109 @@
 <template>
-  <div class="lessons-list">
+  <div class="lessons-list bg-gray-50 min-h-screen py-8">
     <!-- Header -->
-    <div class="mb-6">
+    <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">
-            Lecciones {{ courseData ? `- ${courseData.name}` : '' }}
-          </h1>
-          <p class="mt-2 text-gray-600">
-            Administra las lecciones de este curso
-          </p>
+          <h1 class="text-2xl font-semibold text-gray-800">Lecciones {{ courseData ? `- ${courseData.name}` : '' }}</h1>
+          <p class="mt-1 text-gray-500 text-base">Administra las lecciones de este curso</p>
         </div>
-        <div class="flex space-x-3">
+        <div class="flex gap-3">
           <router-link 
             to="/"
-            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            class="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
           >
             Volver a Cursos
           </router-link>
           <router-link 
             :to="`/courses/${courseId}/lessons/create`"
-            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            class="px-4 py-2 border border-blue-600 text-blue-600 rounded text-sm font-medium bg-white hover:bg-blue-50 transition"
           >
-            Nueva Lección
+            <span class="inline-flex items-center gap-1">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Nueva Lección
+            </span>
           </router-link>
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
+    <div v-if="loading" class="flex flex-col justify-center items-center py-16">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span class="ml-2 text-gray-600">Cargando lecciones...</span>
+      <span class="mt-4 text-gray-500 text-base">Cargando lecciones...</span>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800">Error al cargar las lecciones</h3>
-          <p class="text-sm text-red-700 mt-1">{{ error }}</p>
-        </div>
+    <div v-else-if="error" class="bg-red-50 border border-red-200 rounded p-4 mb-8 flex items-center gap-3">
+      <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+      </svg>
+      <div>
+        <h3 class="text-base font-medium text-red-800">Error al cargar las lecciones</h3>
+        <p class="text-sm text-red-700 mt-1">{{ error }}</p>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="lessons.length === 0" class="text-center py-12">
+  <div v-else-if="lessons.length === 0" class="text-center py-16">
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
-      <h3 class="mt-4 text-lg font-medium text-gray-900">No hay lecciones disponibles</h3>
-      <p class="mt-2 text-gray-500">Comienza creando la primera lección de este curso.</p>
+  <h3 class="mt-4 text-lg font-semibold text-gray-800">No hay lecciones disponibles</h3>
+  <p class="mt-2 text-gray-500">Comienza creando la primera lección de este curso.</p>
       <div class="mt-6">
         <router-link 
           :to="`/courses/${courseId}/lessons/create`"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          class="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-50 transition"
         >
-          <svg class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-          </svg>
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Crear Primera Lección
         </router-link>
       </div>
     </div>
 
     <!-- Lessons List -->
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-6">
       <div 
         v-for="lesson in lessons" 
         :key="lesson.id" 
-        class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200"
+        class="bg-white border border-gray-200 shadow-sm rounded-lg p-8 hover:shadow transition-shadow duration-200"
       >
         <div class="flex items-start justify-between">
           <div class="flex-1">
-            <div class="flex items-center space-x-3 mb-2">
+            <div class="flex items-center gap-3 mb-2">
               <span 
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                 :class="getDifficultyClasses(lesson.difficulty)"
               >
                 {{ lesson.difficulty }}
               </span>
-              <span class="text-sm text-gray-500">
-                Nivel {{ lesson.level_number }}
-              </span>
-              <span class="text-sm text-gray-500">
-                {{ lesson.time_minutes }} min
-              </span>
+              <span class="text-sm text-gray-500">Nivel {{ lesson.level_number }}</span>
+              <span class="text-sm text-gray-500">{{ lesson.time_minutes }} min</span>
             </div>
-            
-            <h3 class="text-lg font-medium text-gray-900 mb-2">
-              {{ lesson.name }}
-            </h3>
-            
-            <p class="text-gray-600 text-sm mb-3">
-              {{ lesson.description }}
-            </p>
-            
-            <div class="text-xs text-gray-500">
-              Creada: {{ formatDate(lesson.created_at) }}
-            </div>
+            <h3 class="text-base font-semibold text-gray-800 mb-2">{{ lesson.name }}</h3>
+            <p class="text-gray-600 text-sm mb-3">{{ lesson.description }}</p>
+            <div class="text-xs text-gray-500">Creada: {{ formatDate(lesson.created_at) }}</div>
           </div>
-          
           <!-- Actions -->
-          <div class="flex space-x-2 ml-4">
+          <div class="flex gap-2 ml-4">
             <router-link 
               :to="`/courses/${courseId}/lessons/${lesson.id}/edit`"
-              class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+              class="inline-flex items-center px-3 py-1 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-50 transition"
             >
-              Editar
+              <span class="inline-flex items-center gap-1">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Editar
+              </span>
             </router-link>
             <button 
               @click="deleteLesson(lesson)"
-              class="inline-flex items-center px-3 py-1 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50"
+              class="inline-flex items-center px-3 py-1 border border-red-600 text-red-600 text-xs font-medium rounded hover:bg-red-50 transition"
             >
-              Eliminar
+              <span class="inline-flex items-center gap-1">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Eliminar
+              </span>
             </button>
           </div>
         </div>
@@ -126,32 +111,26 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-gray-700 bg-opacity-40 flex items-center justify-center z-50">
+      <div class="w-full max-w-sm mx-auto bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-2">
             <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 mt-4">Confirmar eliminación</h3>
-          <div class="mt-2 px-7 py-3">
-            <p class="text-sm text-gray-500">
-              ¿Estás seguro de que quieres eliminar la lección "{{ lessonToDelete?.name }}"? Esta acción no se puede deshacer.
-            </p>
-          </div>
-          <div class="items-center px-4 py-3">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Confirmar eliminación</h3>
+          <p class="text-sm text-gray-500 mb-4 text-center">¿Estás seguro de que quieres eliminar la lección "{{ lessonToDelete?.name }}"? Esta acción no se puede deshacer.</p>
+          <div class="flex gap-2 w-full justify-center">
             <button 
               @click="confirmDelete"
               :disabled="deleting"
-              class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-red-700 disabled:opacity-50"
-            >
+              class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded hover:bg-red-700 disabled:opacity-50 transition w-24">
               {{ deleting ? 'Eliminando...' : 'Eliminar' }}
             </button>
             <button 
               @click="cancelDelete"
-              class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-24 hover:bg-gray-400"
-            >
+              class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded hover:bg-gray-300 transition w-24">
               Cancelar
             </button>
           </div>
