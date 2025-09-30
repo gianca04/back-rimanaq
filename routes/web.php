@@ -6,6 +6,7 @@ Route::get('/', function () {
     return view('vue');
 });
 
-Route::get('{any}', function () {
-    return view('vue');
-})->where('any', '.*');
+// Comentamos la ruta comodín temporalmente para que no interfiera con la API
+// Route::get('{any}', function () {
+//     return view('vue');
+// })->where('any', '^(?!api).*$');

@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\API;
+
+namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
@@ -42,6 +43,7 @@ class CourseController extends Controller
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
                 'image_path' => 'nullable|string|max:255',
+                'color' => 'nullable|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
             ]);
 
             $course = Course::create($validated);
@@ -96,6 +98,7 @@ class CourseController extends Controller
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
                 'image_path' => 'nullable|string|max:255',
+                'color' => 'nullable|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
             ]);
 
             $course->update($validated);

@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('gestures', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->string('image_path')->nullable();
-                $table->string('color')->nullable();
+            $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
+            $table->json('gesture_data'); // Campo para almacenar todo el JSON del gesto
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('gestures');
     }
 };
