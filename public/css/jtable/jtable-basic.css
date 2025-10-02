@@ -1,0 +1,177 @@
+/*
+ * jTable - Basic CSS Styles
+ * Minimal version for functionality
+ */
+
+.jtable {
+    width: 100%;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+}
+
+.jtable-title {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.jtable-toolbar {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    padding: 5px 10px;
+    min-height: 30px;
+}
+
+.jtable-toolbar .jtable-toolbar-left {
+    float: left;
+}
+
+.jtable-toolbar .jtable-toolbar-right {
+    float: right;
+}
+
+.jtable-toolbar .jtable-toolbar-item {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.jtable-main-container {
+    overflow: auto;
+}
+
+.jtable-data {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.jtable-column-header {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.jtable-data-row {
+    border-bottom: 1px solid #eee;
+}
+
+.jtable-data-row:hover {
+    background-color: #f8f9fa;
+}
+
+.jtable-data-row td {
+    padding: 8px;
+    border-right: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.jtable-command-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.jtable-command-button:hover {
+    background: #0056b3;
+}
+
+.jtable-command-button-add {
+    background: #28a745;
+}
+
+.jtable-command-button-edit {
+    background: #ffc107;
+    color: #212529;
+}
+
+.jtable-command-button-delete {
+    background: #dc3545;
+}
+
+.jtable-paging {
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.jtable-page-list {
+    display: inline-block;
+}
+
+.jtable-page-number {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    background: white;
+    text-decoration: none;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.jtable-page-number:hover,
+.jtable-page-number-active {
+    background: #007bff;
+    color: white;
+}
+
+.jtable-dialog {
+    font-family: Arial, sans-serif;
+}
+
+.jtable-dialog .ui-dialog-titlebar {
+    text-align: center;
+}
+
+.jtable-input-field-container {
+    margin-bottom: 10px;
+}
+
+.jtable-input-label {
+    display: inline-block;
+    width: 30%;
+    vertical-align: top;
+    text-align: right;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.jtable-input {
+    display: inline-block;
+    width: 65%;
+}
+
+.jtable-input input,
+.jtable-input select,
+.jtable-input textarea {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.jtable-busy-message {
+    background: rgba(255, 255, 255, 0.8);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #666;
+}

@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\V1\GestureController;
 use App\Http\Controllers\API\V1\LessonController;
 use App\Http\Controllers\API\V1\ProgressController;
+use App\Http\Controllers\API\V1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\AuthController;
@@ -34,32 +35,107 @@ Route::get('/login', function () {
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    // Rutas de cursos (públicas por ahora)
-    Route::apiResource('courses', CourseController::class);
+    
+    // Rutas de usuarios
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{user}', [UserController::class, 'show']);
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas de Recursos Principales
+    |--------------------------------------------------------------------------
+    | Rutas RESTful completas para los recursos principales del sistema
+    */
 
-    // Rutas de lecciones (públicas por ahora)
-    Route::apiResource('lessons', LessonController::class);
+    // Cursos - CRUD completo
+    Route::apiResource('courses', CourseController::class)->names([
+        'index' => 'courses.index',
+        'store' => 'courses.store',
+        'show' => 'courses.show',
+        'update' => 'courses.update',
+        'destroy' => 'courses.destroy'
+    ]);
 
-    // Ruta para obtener lecciones de un curso específico
-    Route::get('courses/{course}/lessons', [LessonController::class, 'getByCourse']);
+    // Lecciones - CRUD completo
+    Route::apiResource('lessons', LessonController::class)->names([
+        'index' => 'lessons.index',
+        'store' => 'lessons.store',
+        'show' => 'lessons.show',
+        'update' => 'lessons.update',
+        'destroy' => 'lessons.destroy'
+    ]);
 
-    // Rutas de gestos (públicas por ahora)
-    Route::apiResource('gestures', GestureController::class);
+    // Gestos - CRUD completo
+    Route::apiResource('gestures', GestureController::class)->names([
+        'index' => 'gestures.index',
+        'store' => 'gestures.store',
+        'show' => 'gestures.show',
+        'update' => 'gestures.update',
+        'destroy' => 'gestures.destroy'
+    ]);
 
-    // Ruta para obtener gestos de una lección específica
-    Route::get('lessons/{lesson}/gestures', [GestureController::class, 'getByLesson']);
+    // Progreso - CRUD completo
+    Route::apiResource('progress', ProgressController::class)->names([
+        'index' => 'progress.index',
+        'store' => 'progress.store',
+        'show' => 'progress.show',
+        'update' => 'progress.update',
+        'destroy' => 'progress.destroy'
+    ]);
 
-    // Rutas de progreso (públicas por ahora)
-    Route::apiResource('progress', ProgressController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas de Relaciones y Consultas Específicas
+    |--------------------------------------------------------------------------
+    | Rutas para obtener datos relacionados entre recursos
+    */
 
-    // Rutas específicas para consultar progreso
-    Route::get('users/{user}/progress', [ProgressController::class, 'getByUser']);
-    Route::get('courses/{course}/progress', [ProgressController::class, 'getByCourse']);
-    Route::get('lessons/{lesson}/progress', [ProgressController::class, 'getByLesson']);
+    // Lecciones de un curso específico
+    Route::get('courses/{course}/lessons', [LessonController::class, 'getByCourse'])
+        ->name('courses.lessons')
+        ->whereNumber('course');
 
-    // Rutas para acciones específicas de progreso
-    Route::post('progress/mark-completed', [ProgressController::class, 'markCompleted']);
-    Route::post('progress/increment-attempts', [ProgressController::class, 'incrementAttempts']);
+    // Gestos de una lección específica
+    Route::get('lessons/{lesson}/gestures', [GestureController::class, 'getByLesson'])
+        ->name('lessons.gestures')
+        ->whereNumber('lesson');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas de Progreso y Estadísticas
+    |--------------------------------------------------------------------------
+    | Rutas específicas para consultar y actualizar progreso de usuarios
+    */
+
+    // Progreso por usuario
+    Route::get('users/{user}/progress', [ProgressController::class, 'getByUser'])
+        ->name('users.progress')
+        ->whereNumber('user');
+
+    // Progreso por curso
+    Route::get('courses/{course}/progress', [ProgressController::class, 'getByCourse'])
+        ->name('courses.progress')
+        ->whereNumber('course');
+
+    // Progreso por lección
+    Route::get('lessons/{lesson}/progress', [ProgressController::class, 'getByLesson'])
+        ->name('lessons.progress')
+        ->whereNumber('lesson');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Acciones Específicas de Progreso
+    |--------------------------------------------------------------------------
+    | Rutas para acciones específicas del sistema de progreso
+    */
+
+    // Marcar lección como completada
+    Route::post('progress/mark-completed', [ProgressController::class, 'markCompleted'])
+        ->name('progress.mark-completed');
+
+    // Incrementar intentos de una lección
+    Route::post('progress/increment-attempts', [ProgressController::class, 'incrementAttempts'])
+        ->name('progress.increment-attempts');
 
     // Aquí puedes mover las rutas de cursos si quieres que estén protegidas
     // Route::apiResource('courses', App\Http\Controllers\API\CourseController::class);
