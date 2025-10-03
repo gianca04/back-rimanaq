@@ -3,7 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 // Ruta de login
-Route::get('/', function () {
+
+
+
+Route::get('/login', function () {
     return view('auth.login');
 })->name('web.login');
 
@@ -12,7 +15,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('web.dashboard');
 
-// Comentamos la ruta comodín temporalmente para que no interfiera con la API
-// Route::get('{any}', function () {
-//     return view('vue');
-// })->where('any', '^(?!api).*$');
+// Ruta para la vista de cursos
+Route::get('/dashboard/courses', function () {
+    return view('course.index');
+})->name('web.courses.index');
