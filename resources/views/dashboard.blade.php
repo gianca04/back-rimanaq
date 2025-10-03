@@ -78,71 +78,51 @@
     <div class="container-fluid main-container">
         <div class="row">
             <div class="col-12">
-                <h1>Dashboard de Administración</h1>
-                <p class="text-muted">Gestiona los cursos, lecciones, gestos y progreso de la plataforma Rimanaq.</p>
+                <h1>Sistema Rimanaq - Backend Listo</h1>
+                <p class="text-muted">API configurada y lista para usar. Campo 'content' agregado al modelo Lesson.</p>
                 
-                <!-- Flujo jerárquico explicativo -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="alert alert-info" role="alert">
-                            <h5 class="alert-heading">🎯 Flujo de Navegación</h5>
-                            <p class="mb-0">
-                                <strong>Cursos</strong> → <strong>Lecciones</strong> → <strong>Gestos</strong><br>
-                                <small>Haz clic en "Ver Lecciones" dentro de un curso para gestionar sus lecciones específicas, y luego en "Ver Gestos" para gestionar los gestos de cada lección.</small>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="row">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-primary">
-                            <div class="card-body">
-                                <div class="text-primary mb-2">
-                                    <i class="fas fa-book" style="font-size: 2rem;"></i>
-                                </div>
-                                <h5 class="card-title">1. Cursos</h5>
-                                <p class="card-text">Gestiona los cursos disponibles. Desde aquí puedes ver las lecciones de cada curso.</p>
-                                <a href="/dashboard/courses" class="btn btn-primary">Gestionar Cursos</a>
-                            </div>
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h4><i class="fas fa-check-circle me-2"></i>✅ Backend Completado</h4>
+                            <p class="mb-0">La API está configurada y lista. El campo 'content' (JSON) fue agregado exitosamente al modelo Lesson.</p>
                         </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-success">
-                            <div class="card-body">
-                                <div class="text-success mb-2">
-                                    <i class="fas fa-list" style="font-size: 2rem;"></i>
-                                </div>
-                                <h5 class="card-title">2. Lecciones</h5>
-                                <p class="card-text">Ve todas las lecciones o accede desde un curso específico.</p>
-                                <a href="/dashboard/lessons" class="btn btn-success">Ver Todas las Lecciones</a>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>🔌 Endpoints API Disponibles</h5>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-warning">
                             <div class="card-body">
-                                <div class="text-warning mb-2">
-                                    <i class="fas fa-hand-paper" style="font-size: 2rem;"></i>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Autenticación:</h6>
+                                        <ul class="list-unstyled">
+                                            <li>• POST /api/login</li>
+                                            <li>• POST /api/logout</li>
+                                            <li>• POST /api/register</li>
+                                        </ul>
+                                        
+                                        <h6>Cursos:</h6>
+                                        <ul class="list-unstyled">
+                                            <li>• GET/POST/PUT/DELETE /api/courses</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Lecciones (con campo 'content'):</h6>
+                                        <ul class="list-unstyled">
+                                            <li>• GET/POST/PUT/DELETE /api/lessons</li>
+                                        </ul>
+                                        
+                                        <h6>Gestos & Progreso:</h6>
+                                        <ul class="list-unstyled">
+                                            <li>• GET/POST/PUT/DELETE /api/gestures</li>
+                                            <li>• GET/POST/PUT/DELETE /api/progress</li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                <h5 class="card-title">3. Gestos</h5>
-                                <p class="card-text">Ve todos los gestos o accede desde una lección específica.</p>
-                                <a href="/dashboard/gestures" class="btn btn-warning">Ver Todos los Gestos</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="card text-center border-info">
-                            <div class="card-body">
-                                <div class="text-info mb-2">
-                                    <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
+                                <div class="alert alert-info mt-3">
+                                    <strong>Nuevo:</strong> El modelo Lesson incluye campo <code>content</code> (JSON nullable) para contenido estructurado.
                                 </div>
-                                <h5 class="card-title">Progreso</h5>
-                                <p class="card-text">Monitorea el progreso de los usuarios en las lecciones.</p>
-                                <a href="/dashboard/progress" class="btn btn-info">Ver Progreso</a>
                             </div>
                         </div>
                     </div>
