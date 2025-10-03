@@ -21,11 +21,13 @@ class Lesson extends Model
         'description',
         'difficulty',
         'time_minutes',
+        'content',
     ];
 
     protected $casts = [
         'level_number' => 'integer',
         'time_minutes' => 'integer',
+        'content' => 'json',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

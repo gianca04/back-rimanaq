@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Lecciones del Curso')
-
+aaaaaaaaaaaaaaaaaaaaaa
 @section('breadcrumbs')
     @include('components.breadcrumbs', ['breadcrumbs' => [
         ['title' => 'Dashboard', 'url' => '/dashboard', 'icon' => 'fas fa-tachometer-alt'],
