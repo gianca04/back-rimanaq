@@ -111,7 +111,7 @@ DELETE /api/courses/{id}
 }
 ```
 
----
+---g
 
 ## 📖 Lecciones (Lessons)
 
@@ -283,14 +283,20 @@ DELETE /api/lessons/{id}
 }
 ```
 
-### Endpoints
+---
 
-#### 📝 Listar todos los gestos
+## 📋 Endpoints del GestureController
+
+### � GET /api/gestures
+**Descripción:** Obtiene una lista de todos los gestos almacenados en el sistema.
+
+**Sintaxis:**
 ```http
 GET /api/gestures
+Authorization: Bearer {token}
 ```
 
-**Respuesta:**
+**Respuesta Exitosa (200):**
 ```json
 {
   "success": true,
@@ -299,38 +305,73 @@ GET /api/gestures
       "id": 1,
       "lesson_id": 1,
       "gesture_data": {
+        "id": 1728154221000,
         "name": "HOLA",
-        "frames": [...]
+        "frames": [
+          {
+            "id": 1728154221001,
+            "timestamp": "2025-10-05T21:12:00.000Z",
+            "landmarks": [[{"x": 0.7179, "y": 0.7625, "z": 0.0000}]],
+            "gestureName": "HOLA",
+            "frameIndex": 0
+          }
+        ],
+        "frameCount": 1,
+        "isSequential": true
       },
+      "created_at": "2025-10-05T21:11:47.000000Z",
+      "updated_at": "2025-10-05T21:12:17.000000Z",
       "lesson": {
         "id": 1,
-        "name": "Saludos básicos"
+        "name": "Leccion de Prueba"
       }
     }
   ]
 }
 ```
 
-#### 📝 Crear un nuevo gesto
-```http
-POST /api/gestures
+**Respuesta sin gestos (200):**
+```json
+{
+  "success": true,
+  "data": []
+}
 ```
 
-**Parámetros:**
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+### ➕ POST /api/gestures
+**Descripción:** Crea un nuevo gesto en el sistema asociado a una lección específica.
+
+**Sintaxis:**
+```http
+POST /api/gestures
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Parámetros requeridos:**
 ```json
 {
   "lesson_id": 1,
   "gesture_data": {
-    "id": 1759185666681,
+    "id": 1728154221000,
     "name": "HOLA",
     "frames": [
       {
-        "id": 1759185663915,
-        "timestamp": "2025-09-29T22:41:03.915Z",
+        "id": 1728154221001,
+        "timestamp": "2025-10-05T21:12:00.000Z",
         "landmarks": [
           [
-            {"x": 0.717910647392273, "y": 0.7625558972358704, "z": 4.3085404399789695e-7},
-            {"x": 0.6374301910400391, "y": 0.7263977527618408, "z": -0.031192097812891006}
+            {"x": 0.7179, "y": 0.7625, "z": 0.0000},
+            {"x": 0.6374, "y": 0.7263, "z": -0.0311}
           ]
         ],
         "gestureName": "HOLA",
@@ -343,25 +384,300 @@ POST /api/gestures
 }
 ```
 
-#### 📝 Obtener gestos de una lección específica
-```http
-GET /api/lessons/{lesson_id}/gestures
+**Respuesta Exitosa (201):**
+```json
+{
+  "success": true,
+  "message": "Gesto creado exitosamente",
+  "data": {
+    "lesson_id": 1,
+    "gesture_data": {
+      "id": 1728154221000,
+      "name": "HOLA",
+      "frames": [...],
+      "frameCount": 1,
+      "isSequential": true
+    },
+    "updated_at": "2025-10-05T21:12:17.000000Z",
+    "created_at": "2025-10-05T21:11:47.000000Z",
+    "id": 1,
+    "lesson": {
+      "id": 1,
+      "name": "Leccion de Prueba"
+    }
+  }
+}
 ```
 
-#### 📝 Obtener un gesto específico
+**Error de validación (422):**
+```json
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "lesson_id": ["The lesson id field is required."],
+    "gesture_data": ["The gesture data field is required."]
+  }
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+### � GET /api/gestures/{id}
+**Descripción:** Obtiene un gesto específico por su ID.
+
+**Sintaxis:**
 ```http
 GET /api/gestures/{id}
+Authorization: Bearer {token}
 ```
 
-#### 📝 Actualizar un gesto
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "lesson_id": 1,
+    "gesture_data": {
+      "id": 1728154221000,
+      "name": "ADIOS",
+      "frames": [
+        {
+          "id": 1728154221001,
+          "timestamp": "2025-10-05T21:12:00.000Z",
+          "landmarks": [[{"x": 0.7179, "y": 0.7625, "z": 0.0000}]],
+          "gestureName": "ADIOS",
+          "frameIndex": 0
+        }
+      ],
+      "frameCount": 1,
+      "isSequential": true
+    },
+    "created_at": "2025-10-05T21:11:47.000000Z",
+    "updated_at": "2025-10-05T21:12:47.000000Z",
+    "lesson": {
+      "id": 1,
+      "name": "Leccion de Prueba"
+    }
+  }
+}
+```
+
+**Error - Gesto no encontrado (404):**
+```json
+{
+  "message": "No query results for model [App\\Models\\Gesture] 999"
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+### ✏️ PUT /api/gestures/{id}
+**Descripción:** Actualiza un gesto existente en el sistema.
+
+**Sintaxis:**
 ```http
 PUT /api/gestures/{id}
+Authorization: Bearer {token}
+Content-Type: application/json
 ```
 
-#### 📝 Eliminar un gesto
+**Parámetros:**
+```json
+{
+  "lesson_id": 1,
+  "gesture_data": {
+    "id": 1728154221000,
+    "name": "ADIOS",
+    "frames": [
+      {
+        "id": 1728154221001,
+        "timestamp": "2025-10-05T21:12:00.000Z",
+        "landmarks": [[{"x": 0.7179, "y": 0.7625, "z": 0.0000}]],
+        "gestureName": "ADIOS",
+        "frameIndex": 0
+      }
+    ],
+    "frameCount": 1,
+    "isSequential": true
+  }
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "message": "Gesto actualizado exitosamente",
+  "data": {
+    "id": 1,
+    "lesson_id": 1,
+    "gesture_data": {
+      "id": 1728154221000,
+      "name": "ADIOS",
+      "frames": [...],
+      "frameCount": 1,
+      "isSequential": true
+    },
+    "created_at": "2025-10-05T21:11:47.000000Z",
+    "updated_at": "2025-10-05T21:12:47.000000Z",
+    "lesson": {
+      "id": 1,
+      "name": "Leccion de Prueba"
+    }
+  }
+}
+```
+
+**Error - Gesto no encontrado (404):**
+```json
+{
+  "message": "No query results for model [App\\Models\\Gesture] 999"
+}
+```
+
+**Error de validación (422):**
+```json
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "lesson_id": ["The lesson id field must be an integer."]
+  }
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+### �️ DELETE /api/gestures/{id}
+**Descripción:** Elimina un gesto específico del sistema de forma permanente.
+
+**Sintaxis:**
 ```http
 DELETE /api/gestures/{id}
+Authorization: Bearer {token}
 ```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "message": "Gesto eliminado exitosamente"
+}
+```
+
+**Error - Gesto no encontrado (404):**
+```json
+{
+  "message": "No query results for model [App\\Models\\Gesture] 999"
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+### 📚 GET /api/lessons/{lesson_id}/gestures
+**Descripción:** Obtiene todos los gestos asociados a una lección específica.
+
+**Sintaxis:**
+```http
+GET /api/lessons/{lesson_id}/gestures
+Authorization: Bearer {token}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "lesson_id": 1,
+      "gesture_data": {
+        "id": 1728154221000,
+        "name": "ADIOS",
+        "frames": [
+          {
+            "id": 1728154221001,
+            "timestamp": "2025-10-05T21:12:00.000Z",
+            "landmarks": [[{"x": 0.7179, "y": 0.7625, "z": 0.0000}]],
+            "gestureName": "ADIOS",
+            "frameIndex": 0
+          }
+        ],
+        "frameCount": 1,
+        "isSequential": true
+      },
+      "created_at": "2025-10-05T21:11:47.000000Z",
+      "updated_at": "2025-10-05T21:12:47.000000Z"
+    }
+  ]
+}
+```
+
+**Respuesta sin gestos (200):**
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+---
+
+## 🔄 Códigos de Respuesta para Gestos
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | OK - Operación exitosa |
+| 201 | Created - Gesto creado exitosamente |
+| 401 | Unauthorized - Token de autenticación requerido |
+| 404 | Not Found - Gesto o lección no encontrada |
+| 422 | Unprocessable Entity - Error de validación en los datos |
+| 500 | Internal Server Error - Error interno del servidor |
+
+---
+
+## 📝 Notas Importantes
+
+1. **Autenticación requerida:** Todos los endpoints requieren un token Bearer válido.
+2. **Validación de datos:** El campo `gesture_data` debe contener la estructura completa del gesto con landmarks de MediaPipe.
+3. **Relación con lecciones:** Los gestos deben estar asociados a lecciones existentes.
+4. **Formato JSON:** Todos los datos de entrada y salida utilizan formato JSON.
+5. **Timestamps:** Se generan automáticamente en formato ISO 8601.
 
 ---
 

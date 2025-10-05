@@ -4,6 +4,9 @@
 const routes = {
     login: '/login',
     dashboard: '/dashboard',
+    courses: '/dashboard/courses',
+    lessons: '/dashboard/lessons',
+    gestures: '/dashboard/gestures',
     apiLogout: '/api/logout'
 };
 

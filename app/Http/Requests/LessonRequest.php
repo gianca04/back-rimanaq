@@ -31,7 +31,7 @@ class LessonRequest extends FormRequest
             'description' => 'required|string|min:10|max:2000',
             'difficulty' => 'required|in:fácil,facil,intermedio,difícil,dificil',
             'time_minutes' => 'required|integer|min:5|max:600', // mínimo 5 min, máximo 10 horas
-            'content' => 'nullable|json',
+            'content' => 'nullable', // Sin validación específica, acepta cualquier tipo
         ];
 
         // Para actualizaciones, hacer campos opcionales pero mantener validaciones
@@ -43,7 +43,7 @@ class LessonRequest extends FormRequest
                 'description' => 'sometimes|string|min:10|max:2000',
                 'difficulty' => 'sometimes|in:fácil,facil,intermedio,difícil,dificil',
                 'time_minutes' => 'sometimes|integer|min:5|max:600',
-                'content' => 'sometimes|nullable|json',
+                'content' => 'sometimes|nullable', // Sin validación específica
             ];
         }
 
@@ -72,6 +72,9 @@ class LessonRequest extends FormRequest
                 'description' => $this->description ? trim($this->description) : $this->description,
             ]);
         }
+
+        // El campo content se acepta tal como viene (string, array, JSON, etc.)
+        // No se aplica ninguna transformación o validación específica
     }
 
     /**
@@ -106,8 +109,6 @@ class LessonRequest extends FormRequest
             'time_minutes.integer' => 'El tiempo debe ser un número entero.',
             'time_minutes.min' => 'El tiempo debe ser al menos 5 minutos.',
             'time_minutes.max' => 'El tiempo no puede exceder los 600 minutos (10 horas).',
-            
-            'content.json' => 'El contenido debe ser un JSON válido.',
         ];
     }
     

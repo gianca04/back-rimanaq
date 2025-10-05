@@ -14,10 +14,10 @@
                     <a class="nav-link" href="{{ route('web.courses.index') }}">Cursos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/dashboard/lessons">Lecciones</a>
+                    <a class="nav-link" href="{{ route('web.lessons.index') }}">Lecciones</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/dashboard/gestures">Gestos</a>
+                    <a class="nav-link" href="{{ route('web.gestures.index') }}">Gestos</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard/progress">Progreso</a>

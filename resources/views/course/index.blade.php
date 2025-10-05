@@ -54,7 +54,9 @@
 	// Renderizar cursos
 	async function fetchCourses() {
 		const res = await fetch(apiBase, {
-			headers: { 'Authorization': `Bearer ${token}` }
+			headers: {
+				'Authorization': `Bearer ${token}`
+			}
 		});
 		const data = await res.json();
 		tableBody.innerHTML = '';
@@ -78,7 +80,7 @@
 	window.editCourse = async function(id) {
 		editingId = id;
 		modalLabel.textContent = 'Editar curso';
-		
+
 		// Obtener datos del curso
 		const result = await window.apiRequest(`${apiBase}/${id}`, {
 			method: 'GET'
@@ -93,7 +95,7 @@
 			courseForm.description.value = course.description;
 			courseForm.image_path.value = course.image_path || '';
 			courseForm.color.value = course.color || '';
-			
+
 			const modal = new bootstrap.Modal(document.getElementById('courseModal'));
 			modal.show();
 		}
@@ -101,7 +103,7 @@
 
 	window.deleteCourse = async function(id) {
 		if (!confirm('¿Eliminar este curso?')) return;
-		
+
 		const result = await window.apiRequest(`${apiBase}/${id}`, {
 			method: 'DELETE'
 		}, {
@@ -128,11 +130,11 @@
 			image_path: courseForm.image_path.value,
 			color: courseForm.color.value
 		};
-		
+
 		let url = apiBase;
 		let method = 'POST';
 		let successMessage = 'Curso creado exitosamente';
-		
+
 		if (editingId) {
 			url += `/${editingId}`;
 			method = 'PUT';
@@ -155,6 +157,5 @@
 	});
 
 	fetchCourses();
-	</script>
+</script>
 @endsection
-

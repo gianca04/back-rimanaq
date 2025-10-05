@@ -1,11 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\CourseWebController;
 
 // Ruta de login
-
-
-
 Route::get('/login', function () {
     return view('auth.login');
 })->name('web.login');
@@ -15,7 +13,37 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('web.dashboard');
 
-// Ruta para la vista de cursos
-Route::get('/dashboard/courses', function () {
-    return view('course.index');
-})->name('web.courses.index');
+// Rutas para la gestión web de cursos
+Route::prefix('dashboard')->name('web.')->group(function () {
+    Route::get('/courses', [CourseWebController::class, 'index'])->name('courses.index');
+    Route::get('/courses/create', [CourseWebController::class, 'create'])->name('courses.create');
+    Route::get('/courses/{id}', [CourseWebController::class, 'show'])->name('courses.show');
+    Route::get('/courses/{id}/edit', [CourseWebController::class, 'edit'])->name('courses.edit');
+});
+
+// Rutas para la vista de lecciones
+Route::get('/dashboard/lessons', function () {
+    return view('lesson.index');
+})->name('web.lessons.index');
+
+Route::get('/dashboard/lessons/create', function () {
+    return view('lesson.create');
+})->name('web.lessons.create');
+
+Route::get('/dashboard/lessons/edit/{id}', function ($id) {
+    return view('lesson.edit', compact('id'));
+})->name('web.lessons.edit');
+
+// Rutas para la vista de gestos
+Route::get('/dashboard/gestures', function () {
+    return view('gesture.index');
+})->name('web.gestures.index');
+
+Route::get('/dashboard/gestures/create', function () {
+    return view('gesture.create');
+})->name('web.gestures.create');
+
+Route::get('/dashboard/gestures/edit/{id}', function ($id) {
+    return view('gesture.edit', compact('id'));
+})->name('web.gestures.edit');
+
