@@ -25,6 +25,7 @@ class DataManager {
   // Establecer el gesto que se está editando
   setCurrentEditingGesture(gestureData) {
     this.currentEditingGesture = gestureData;
+    console.log('Gesto establecido para edición:', gestureData);
   }
 
   // Exportar el gesto actual que se está editando
@@ -34,16 +35,31 @@ class DataManager {
       return;
     }
 
+    // Determinar si usar los frames actuales (modificados) o los originales
+    const hasModifiedFrames = this.gestureSystem.currentFrames && this.gestureSystem.currentFrames.length > 0;
+    const framesToExport = hasModifiedFrames ? this.gestureSystem.currentFrames : this.currentEditingGesture.gesture_data.frames;
+    const frameCountToExport = hasModifiedFrames ? this.gestureSystem.currentFrames.length : this.currentEditingGesture.gesture_data.frameCount;
+    
+    // Obtener el nombre actualizado del input si existe
+    const gestureNameInput = document.getElementById('gestureName');
+    const gestureName = (gestureNameInput?.value?.trim()) || this.currentEditingGesture.gesture_data.name;
+
     const gestureData = {
       version: "1.0",
       createdAt: new Date().toISOString(),
       gesture: {
         id: this.currentEditingGesture.gesture_data.id,
-        name: this.currentEditingGesture.gesture_data.name,
-        frames: this.gestureSystem.currentFrames || this.currentEditingGesture.gesture_data.frames,
-        frameCount: this.gestureSystem.currentFrames?.length || this.currentEditingGesture.gesture_data.frameCount,
+        name: gestureName,
+        frames: framesToExport,
+        frameCount: frameCountToExport,
         isSequential: this.currentEditingGesture.gesture_data.isSequential,
-        createdAt: this.currentEditingGesture.created_at
+        createdAt: this.currentEditingGesture.created_at,
+        // Información adicional sobre la edición
+        editInfo: {
+          originalDbId: this.currentEditingGesture.id,
+          hasModifications: hasModifiedFrames,
+          exportedAt: new Date().toISOString()
+        }
       }
     };
 
@@ -53,11 +69,18 @@ class DataManager {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `gesto_${this.currentEditingGesture.gesture_data.name}_${new Date().toISOString().split("T")[0]}.json`;
+    
+    // Nombre del archivo más descriptivo
+    const suffix = hasModifiedFrames ? "modificado" : "original";
+    a.download = `gesto_${gestureName}_${suffix}_${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
-    this.gestureSystem.statusText.textContent = `Gesto "${this.currentEditingGesture.gesture_data.name}" exportado`;
+    const statusMsg = hasModifiedFrames 
+      ? `Gesto "${gestureName}" exportado con modificaciones` 
+      : `Gesto "${gestureName}" exportado (original)`;
+    
+    this.gestureSystem.statusText.textContent = statusMsg;
   }
 
   exportAllGestures() {

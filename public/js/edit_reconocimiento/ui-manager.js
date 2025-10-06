@@ -39,13 +39,20 @@ class UIManager {
     // Mostrar/ocultar elementos según el modo
     if (mode === "capture") {
       document.getElementById("captureInfo").style.display = "block";
-      document.getElementById("gestureListSection").style.display = "block";
+      // En edición no mostramos la lista de gestos guardados
+      const gestureListSection = document.getElementById("gestureListSection");
+      if (gestureListSection) {
+        gestureListSection.style.display = "none";
+      }
       document.getElementById("recognitionResults").classList.remove("active");
       this.gestureSystem.statusText.textContent =
-        "Modo registro activado - Captura gestos secuenciales";
+        "Modo edición activado - Modifica el gesto capturando nuevos frames";
     } else if (mode === "practice") {
       document.getElementById("captureInfo").style.display = "none";
-      document.getElementById("gestureListSection").style.display = "none";
+      const gestureListSection = document.getElementById("gestureListSection");
+      if (gestureListSection) {
+        gestureListSection.style.display = "none";
+      }
       document.getElementById("recognitionResults").classList.remove("active");
       this.gestureSystem.practiceManager.updatePracticeGestureList();
 
@@ -95,10 +102,9 @@ class UIManager {
         .join("");
     }
 
-    // Habilitar/deshabilitar botón de actualizar gesto
-    if (document.getElementById("updateGestureBtn")) {
-      document.getElementById("updateGestureBtn").disabled =
-        this.gestureSystem.currentFrames.length === 0;
+    // Actualizar información del gesto si la función está disponible
+    if (window.updateGestureInfoDisplay) {
+      window.updateGestureInfoDisplay();
     }
   }
 

@@ -215,132 +215,120 @@
     const updateGestureBtn = document.getElementById('updateGestureBtn');
     const exportCurrentBtn = document.getElementById('exportCurrentBtn');
 
-    // Debug: Verificar que todos los elementos DOM estén disponibles
-    console.log('🔍 Verificando elementos DOM:', {
-        gestureNameInput: !!gestureNameInput,
-        currentGestureName: !!currentGestureName,
-        currentGestureLesson: !!currentGestureLesson,
-        currentGestureFrames: !!currentGestureFrames,
-        currentGestureType: !!currentGestureType,
-        updateGestureBtn: !!updateGestureBtn,
-        exportCurrentBtn: !!exportCurrentBtn
-    });
-
     // Función para cargar los datos del gesto desde la API
     async function loadGestureData() {
         try {
-            console.log('🔄 Cargando gesto ID:', gestureId);
+            console.log('Cargando gesto ID:', gestureId);
             
-            // Mostrar estado de carga
-            displayLoadingState();
-            
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            
-            // Solo agregar Authorization si hay token
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            
-            const response = await fetch(`/api/gestures/${gestureId}`, { headers });
+            const response = await fetch(`/api/gestures/${gestureId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Error ${response.status}: ${errorText}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('📦 Respuesta de la API:', result);
             
             if (result.success && result.data) {
                 currentGestureData = result.data;
-                
-                // Validar que tenga los datos necesarios
-                if (!result.data.gesture_data) {
-                    throw new Error('El gesto no tiene datos de gesture_data');
-                }
-                
-                console.log('✅ Datos del gesto validados correctamente');
                 displayGestureInfo(result.data);
                 loadGestureIntoInterface(result.data);
                 return true;
             } else {
-                throw new Error(result.message || 'No se pudieron cargar los datos del gesto');
+                throw new Error('No se pudieron cargar los datos del gesto');
             }
         } catch (error) {
-            console.error('❌ Error loading gesture:', error);
+            console.error('Error loading gesture:', error);
             displayError('Error al cargar el gesto: ' + error.message);
             return false;
         }
     }
 
-    // Función para mostrar estado de carga
-    function displayLoadingState() {
-        currentGestureName.textContent = 'Cargando...';
-        currentGestureName.className = 'loading-state';
-        currentGestureLesson.textContent = 'Cargando...';
-        currentGestureFrames.textContent = 'Cargando...';
-        currentGestureType.textContent = 'Cargando...';
-        
-        if (gestureNameInput) {
-            gestureNameInput.value = '';
-            gestureNameInput.placeholder = 'Cargando nombre del gesto...';
-        }
-    }
-
     // Función para mostrar la información del gesto
     function displayGestureInfo(gestureData) {
-        const gestureName = gestureData.gesture_data?.name || 'Sin nombre';
-        const lessonName = gestureData.lesson?.name || 'Sin lección';
-        const frameCount = gestureData.gesture_data?.frameCount || 0;
-        const gestureType = gestureData.gesture_data?.isSequential ? 'Secuencial' : 'Estático';
+        const originalName = gestureData.gesture_data?.name || 'Sin nombre';
+        const originalFrameCount = gestureData.gesture_data?.frameCount || 0;
         
-        // Actualizar la información mostrada
-        currentGestureName.textContent = gestureName;
-        currentGestureLesson.textContent = lessonName;
-        currentGestureFrames.textContent = frameCount;
-        currentGestureType.textContent = gestureType;
+        currentGestureName.textContent = originalName;
+        currentGestureLesson.textContent = gestureData.lesson?.name || 'Sin lección';
+        currentGestureFrames.textContent = originalFrameCount;
+        currentGestureType.textContent = gestureData.gesture_data?.isSequential ? 'Secuencial' : 'Estático';
         
-        // Actualizar el input del nombre del gesto
-        if (gestureNameInput) {
-            console.log('🏷️ Actualizando input del nombre:', gestureName);
-            gestureNameInput.value = gestureName !== 'Sin nombre' ? gestureName : '';
-            gestureNameInput.placeholder = gestureName !== 'Sin nombre' ? gestureName : 'Ingrese nombre del gesto';
-            
-            // Forzar la actualización visual
-            gestureNameInput.dispatchEvent(new Event('input', { bubbles: true }));
-            
-            console.log('✅ Input actualizado. Valor actual:', gestureNameInput.value);
-        } else {
-            console.warn('⚠️ No se encontró el input gestureNameInput');
+        // También actualizar el input del nombre
+        if (gestureNameInput && gestureData.gesture_data?.name) {
+            gestureNameInput.value = gestureData.gesture_data.name;
         }
+
+        // Función para actualizar dinámicamente la información cuando hay cambios
+        window.updateGestureInfoDisplay = () => {
+            const currentName = gestureNameInput?.value?.trim() || originalName;
+            const currentFrameCount = window.gestureSystem?.currentFrames?.length || 0;
+            const hasNameChange = currentName !== originalName;
+            const hasFrameChange = currentFrameCount > 0 && currentFrameCount !== originalFrameCount;
+            
+            // Actualizar nombre con indicador de cambio
+            currentGestureName.innerHTML = hasNameChange 
+                ? `${currentName} <small style="color: #28a745;">(modificado)</small>`
+                : currentName;
+            
+            // Actualizar frames con indicador de cambio
+            if (hasFrameChange) {
+                currentGestureFrames.innerHTML = `${currentFrameCount} <small style="color: #28a745;">(${originalFrameCount} original)</small>`;
+            } else if (currentFrameCount === 0) {
+                currentGestureFrames.textContent = originalFrameCount;
+            }
+            
+            // Actualizar botón de actualizar
+            const updateBtn = document.getElementById('updateGestureBtn');
+            if (updateBtn) {
+                const hasChanges = hasNameChange || hasFrameChange;
+                updateBtn.disabled = !hasChanges;
+                updateBtn.textContent = hasChanges 
+                    ? '💾 Actualizar Gesto (Cambios detectados)' 
+                    : '💾 Actualizar Gesto';
+                updateBtn.style.background = hasChanges ? '#28a745' : '#6c757d';
+            }
+        };
         
-        console.log('Información del gesto cargada:', {
-            nombre: gestureName,
-            leccion: lessonName,
-            frames: frameCount,
-            tipo: gestureType
-        });
+        // Llamar la función inicialmente
+        window.updateGestureInfoDisplay();
     }
 
     // Función para cargar el gesto en la interfaz de edición
     function loadGestureIntoInterface(gestureData) {
         if (window.gestureSystem && gestureData.gesture_data) {
-            // Establecer el gesto actual en el data manager
-            if (window.gestureSystem.dataManager && window.gestureSystem.dataManager.setCurrentEditingGesture) {
-                window.gestureSystem.dataManager.setCurrentEditingGesture(gestureData);
-            }
-            
             // Limpiar frames actuales
             window.gestureSystem.currentFrames = [];
             
             // Cargar los frames del gesto
-            if (gestureData.gesture_data.frames && Array.isArray(gestureData.gesture_data.frames)) {
+            if (gestureData.gesture_data.frames) {
                 window.gestureSystem.currentFrames = [...gestureData.gesture_data.frames];
-                console.log(`Cargados ${gestureData.gesture_data.frames.length} frames del gesto`);
-            } else {
-                console.warn('No se encontraron frames válidos en el gesto');
+            }
+            
+            // Cargar el gesto temporalmente en savedGestures para aprovechar el sistema de cache
+            const tempGesture = {
+                id: gestureData.gesture_data.id,
+                name: gestureData.gesture_data.name,
+                frames: gestureData.gesture_data.frames,
+                frameCount: gestureData.gesture_data.frameCount,
+                isSequential: gestureData.gesture_data.isSequential,
+                createdAt: gestureData.created_at || new Date().toISOString(),
+                // Marcador para identificar que es temporal
+                isTemporary: true,
+                originalDbId: gestureData.id,
+                lessonId: gestureData.lesson_id
+            };
+            
+            // Agregar temporalmente al sistema (solo para práctica/reconocimiento)
+            window.gestureSystem.savedGestures = [tempGesture];
+            
+            // Establecer el gesto actual en el data manager
+            if (window.gestureSystem.dataManager) {
+                window.gestureSystem.dataManager.setCurrentEditingGesture(gestureData);
             }
             
             // Actualizar la UI
@@ -348,18 +336,18 @@
                 window.gestureSystem.uiManager.updateDisplay();
             }
             
+            // Actualizar lista de práctica si existe
+            if (window.gestureSystem.practiceManager) {
+                window.gestureSystem.practiceManager.updatePracticeGestureList();
+            }
+            
             // Actualizar estado
             if (window.gestureSystem.statusText) {
-                window.gestureSystem.statusText.textContent = `Gesto "${gestureData.gesture_data.name}" cargado para edición (${window.gestureSystem.currentFrames.length} frames)`;
+                window.gestureSystem.statusText.textContent = `Gesto "${gestureData.gesture_data.name}" cargado para edición`;
             }
 
-            console.log('Gesto cargado en interfaz:', {
-                nombre: gestureData.gesture_data.name,
-                frames: window.gestureSystem.currentFrames.length,
-                datos: gestureData.gesture_data
-            });
-        } else {
-            console.error('gestureSystem no está disponible o faltan datos del gesto');
+            console.log('Gesto cargado en interfaz:', gestureData.gesture_data);
+            console.log('Gesto temporal creado:', tempGesture);
         }
     }
 
@@ -379,11 +367,6 @@
             return;
         }
 
-        if (!window.gestureSystem || window.gestureSystem.currentFrames.length === 0) {
-            alert('No hay frames capturados para actualizar');
-            return;
-        }
-
         const gestureName = gestureNameInput?.value?.trim() || currentGestureData.gesture_data.name;
         
         if (!gestureName) {
@@ -391,13 +374,35 @@
             return;
         }
 
+        // Verificar si hay cambios
+        const originalName = currentGestureData.gesture_data.name;
+        const originalFrameCount = currentGestureData.gesture_data.frameCount;
+        const currentFrameCount = window.gestureSystem?.currentFrames?.length || 0;
+        
+        const hasNameChange = gestureName !== originalName;
+        const hasFrameChange = currentFrameCount > 0 && currentFrameCount !== originalFrameCount;
+        
+        if (!hasNameChange && !hasFrameChange) {
+            alert('No se detectaron cambios para guardar');
+            return;
+        }
+
+        // Determinar qué frames usar
+        const framesToSave = hasFrameChange 
+            ? window.gestureSystem.currentFrames 
+            : currentGestureData.gesture_data.frames;
+            
+        const frameCountToSave = hasFrameChange 
+            ? window.gestureSystem.currentFrames.length 
+            : currentGestureData.gesture_data.frameCount;
+
         const formData = {
             lesson_id: currentGestureData.lesson_id,
             gesture_data: {
                 id: currentGestureData.gesture_data.id,
                 name: gestureName.toUpperCase(),
-                frames: window.gestureSystem.currentFrames,
-                frameCount: window.gestureSystem.currentFrames.length,
+                frames: framesToSave,
+                frameCount: frameCountToSave,
                 isSequential: currentGestureData.gesture_data.isSequential
             }
         };
@@ -418,7 +423,11 @@
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert('Gesto actualizado exitosamente');
+                const changesSummary = [];
+                if (hasNameChange) changesSummary.push(`nombre: "${originalName}" → "${gestureName}"`);
+                if (hasFrameChange) changesSummary.push(`frames: ${originalFrameCount} → ${frameCountToSave}`);
+                
+                alert(`Gesto actualizado exitosamente!\n\nCambios aplicados:\n• ${changesSummary.join('\n• ')}`);
                 window.location.href = '/dashboard/gestures';
             } else {
                 alert('Error: ' + (result.message || 'Error al actualizar el gesto'));
@@ -475,42 +484,26 @@
     if (gestureNameInput) {
         gestureNameInput.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
+            // Actualizar información cuando cambie el nombre
+            if (window.updateGestureInfoDisplay) {
+                window.updateGestureInfoDisplay();
+            }
         });
-    }
-
-    // Variable para controlar si ya se cargaron los datos
-    let dataLoaded = false;
-
-    // Función para intentar cargar los datos
-    async function attemptLoadGestureData() {
-        if (dataLoaded) return;
-        
-        console.log('🎯 Intentando cargar datos del gesto...');
-        const success = await loadGestureData();
-        
-        if (success) {
-            dataLoaded = true;
-            console.log('✅ Datos cargados exitosamente');
-        } else {
-            console.log('❌ Fallo la carga, reintentando en 2 segundos...');
-            setTimeout(attemptLoadGestureData, 2000);
-        }
     }
 
     // Cargar datos cuando la página esté lista
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('📄 DOM cargado, iniciando carga de datos...');
-        // Intentar cargar inmediatamente
-        attemptLoadGestureData();
-        
-        // También intentar después de un delay por si el sistema tarda en inicializarse
-        setTimeout(attemptLoadGestureData, 1500);
+        // Esperar un momento para que se inicialice gestureSystem
+        setTimeout(() => {
+            loadGestureData();
+        }, 1000);
     });
 
     // También intentar cargar después de que se inicialice gestureSystem
-    window.addEventListener('gestureSystemReady', (event) => {
-        console.log('🚀 GestureSystem listo, cargando datos...');
-        attemptLoadGestureData();
+    window.addEventListener('gestureSystemReady', () => {
+        if (!currentGestureData) {
+            loadGestureData();
+        }
     });
 </script>
 @endsection
