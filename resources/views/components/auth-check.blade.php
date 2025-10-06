@@ -1,15 +1,24 @@
 {{-- resources/views/components/auth-check.blade.php --}}
 
-{{-- Incluir el helper de autenticación --}}
-<script src="{{ asset('js/auth-helper.js') }}"></script>
-
 {{-- Meta tag para CSRF token --}}
 <meta name="csrf-token" content="{{ csrf_token() }}">
+
+{{-- Meta tag para login URL --}}
+<meta name="login-url" content="{{ route('web.login') }}">
 
 {{-- Meta tag para token de API si está disponible en sesión --}}
 @if(session('auth_token'))
     <meta name="api-token" content="{{ session('auth_token') }}">
 @endif
+
+{{-- Incluir rutas de JavaScript --}}
+<script type="module">
+    import routes from "{{ asset('js/routes.js') }}";
+    window.routes = routes;
+</script>
+
+{{-- Incluir el helper de autenticación --}}
+<script src="{{ asset('js/auth-helper.js') }}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -21,16 +30,19 @@
             currentPath.startsWith(route)
         );
         
-        if (isProtectedRoute && !AuthHelper.isAuthenticated()) {
-            AuthHelper.handleUnauthorized();
-            return;
-        }
-        
-        // Verificar si el token ha expirado
-        const token = AuthHelper.getToken();
-        if (token && AuthHelper.isTokenExpired(token)) {
-            AuthHelper.handleUnauthorized();
-            return;
+        if (isProtectedRoute) {
+            const token = AuthHelper.getToken();
+            console.log('🔍 Verificando autenticación en ruta protegida:', currentPath);
+            console.log('📱 Token encontrado:', token ? 'SÍ (longitud: ' + token.length + ')' : 'NO');
+            
+            // Verificar si hay token (simplificado temporalmente)
+            if (!token || token.length === 0) {
+                console.log('❌ No hay token de autenticación. Redirigiendo al login...');
+                AuthHelper.handleUnauthorized(true); // Redirección inmediata
+                return;
+            }
+            
+            console.log('✅ Usuario autenticado correctamente - token válido');
         }
         
         // Funciones globales para compatibilidad con código existente

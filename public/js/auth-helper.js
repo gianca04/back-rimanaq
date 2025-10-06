@@ -10,20 +10,33 @@ class AuthHelper {
     static getToken() {
         // Buscar en localStorage (persistente)
         let token = localStorage.getItem('auth_token');
-        if (token) return token;
+        if (token) {
+            console.log('🔑 Token encontrado en localStorage');
+            return token;
+        }
 
         // Buscar en sessionStorage (sesión actual)
         token = sessionStorage.getItem('auth_token');
-        if (token) return token;
+        if (token) {
+            console.log('🔑 Token encontrado en sessionStorage');
+            return token;
+        }
 
         // Buscar en meta tag (para tokens de Laravel)
         const metaToken = document.querySelector('meta[name="api-token"]');
-        if (metaToken) return metaToken.getAttribute('content');
+        if (metaToken && metaToken.getAttribute('content')) {
+            console.log('🔑 Token encontrado en meta tag');
+            return metaToken.getAttribute('content');
+        }
 
         // Buscar en cookies (fallback)
         const cookieToken = this.getCookieValue('api_token');
-        if (cookieToken) return cookieToken;
+        if (cookieToken) {
+            console.log('🔑 Token encontrado en cookies');
+            return cookieToken;
+        }
 
+        console.log('❌ No se encontró token en ninguna fuente');
         return null;
     }
 
@@ -69,6 +82,36 @@ class AuthHelper {
     static isAuthenticated() {
         const token = this.getToken();
         return token !== null && token.length > 0;
+    }
+
+    /**
+     * Valida la estructura de un token (más flexible)
+     * @param {string} token - Token a validar
+     * @returns {boolean} true si el token parece válido
+     */
+    static isValidToken(token) {
+        if (!token || typeof token !== 'string') {
+            return false;
+        }
+
+        // Verificar longitud mínima (evitar tokens obviamente inválidos)
+        if (token.length < 10) {
+            return false;
+        }
+
+        // Si parece JWT, validar estructura JWT
+        if (token.includes('.') && token.split('.').length === 3) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload && typeof payload === 'object';
+            } catch (error) {
+                console.warn('Token JWT con formato inválido:', error);
+                return false;
+            }
+        }
+
+        // Para otros tipos de token, solo verificar que no esté vacío y tenga formato básico
+        return /^[A-Za-z0-9\-_.]+$/.test(token);
     }
 
     /**
@@ -124,9 +167,18 @@ class AuthHelper {
 
     /**
      * Maneja respuestas no autorizadas
+     * @param {boolean} immediate - Si la redirección debe ser inmediata
      */
-    static handleUnauthorized() {
+    static handleUnauthorized(immediate = false) {
         this.removeToken();
+        
+        const loginUrl = this.getLoginUrl();
+        
+        if (immediate) {
+            // Redirección inmediata sin mensaje
+            window.location.href = loginUrl;
+            return;
+        }
         
         // Mostrar mensaje al usuario
         if (window.showAlert) {
@@ -135,8 +187,34 @@ class AuthHelper {
 
         // Redirigir al login después de un breve delay
         setTimeout(() => {
-            window.location.href = '/login';
+            window.location.href = loginUrl;
         }, 2000);
+    }
+
+    /**
+     * Obtiene la URL de login desde múltiples fuentes
+     * @returns {string} URL de login
+     */
+    static getLoginUrl() {
+        // Intentar usar el módulo de rutas si está disponible
+        if (typeof window.routes !== 'undefined' && window.routes.login) {
+            return window.routes.login;
+        }
+
+        // Buscar en el DOM por enlaces de login
+        const loginLink = document.querySelector('a[href*="login"]');
+        if (loginLink) {
+            return loginLink.getAttribute('href');
+        }
+
+        // Buscar en meta tags de Laravel
+        const loginMeta = document.querySelector('meta[name="login-url"]');
+        if (loginMeta) {
+            return loginMeta.getAttribute('content');
+        }
+
+        // Fallback a la ruta por defecto
+        return '/login';
     }
 
     /**
@@ -190,6 +268,11 @@ class AuthHelper {
      * @returns {boolean} True si el token ha expirado
      */
     static isTokenExpired(token) {
+        // Solo verificar expiración si es un token JWT válido
+        if (!token || !token.includes('.')) {
+            return false; // Para tokens no-JWT, asumir que no expiran aquí
+        }
+        
         const payload = this.decodeJWTPayload(token);
         if (!payload || !payload.exp) return false;
         

@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\CourseWebController;
 
+// Ruta raíz - redirige al login
+Route::get('/', function () {
+    return redirect()->route('web.dashboard');
+})->name('web.dashboard');
+
 // Ruta de login
 Route::get('/login', function () {
     return view('auth.login');
