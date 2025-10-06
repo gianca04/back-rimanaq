@@ -10,5 +10,8 @@
 {{-- Additional head content from specific pages --}}
 @yield('head')
 
+{{-- Styles from specific pages --}}
+@yield('styles')
+
 {{-- Favicon --}}
 <link rel="icon" href="/favicon.ico" type="image/x-icon">

@@ -252,27 +252,7 @@ DELETE /api/lessons/{id}
   "id": 1,
   "lesson_id": 1,
   "gesture_data": {
-    "id": 1759185666681,
-    "name": "HOLA",
-    "frames": [
-      {
-        "id": 1759185663915,
-        "timestamp": "2025-09-29T22:41:03.915Z",
-        "landmarks": [...],
-        "landmarksNormalizados": [...],
-        "handedness": [
-          {
-            "index": 1,
-            "score": 0.9696502685546875,
-            "label": "Right"
-          }
-        ],
-        "gestureName": "HOLA",
-        "frameIndex": 0
-      }
-    ],
-    "frameCount": 1,
-    "isSequential": true
+    ...
   },
   "created_at": "2025-09-29T22:00:00Z",
   "updated_at": "2025-09-29T22:00:00Z",
