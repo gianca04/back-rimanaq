@@ -120,19 +120,49 @@ DELETE /api/courses/{id}
 {
   "id": 1,
   "course_id": 1,
-  "name": "Saludos básicos",
+  "name": "Leccion de Prueba",
   "level_number": 1,
-  "description": "Aprende los saludos más comunes en LSP",
+  "description": "Esta es una leccion de prueba para probar endpoints",
   "difficulty": "fácil",
   "time_minutes": 15,
-  "created_at": "2025-09-29T22:00:00Z",
-  "updated_at": "2025-09-29T22:00:00Z",
+  "created_at": "2025-10-05T21:11:14.000000Z",
+  "updated_at": "2025-10-05T21:11:14.000000Z",
+  "content": null,
+  "difficulty_label": "Fácil",
+  "formatted_duration": "15 min",
+  "progress_count": 0,
   "course": {
     "id": 1,
-    "name": "Curso Básico de LSP"
-  }
+    "name": "Curso de Prueba",
+    "description": "Curso para probar endpoints",
+    "image_path": "https://i.ytimg.com/vi/HjOOGujV-LU/maxresdefault.jpg",
+    "color": "#3498db",
+    "created_at": "2025-10-05T21:09:50.000000Z",
+    "updated_at": "2025-10-06T00:05:17.000000Z"
+  },
+  "gestures": [
+    {
+      "id": 6,
+      "lesson_id": 1,
+      "gesture_data": {
+        "name": "pruebaaa",
+        "frames": [...],
+        "frameCount": 3,
+        "isSequential": true
+      },
+      "created_at": "2025-10-06T07:05:13.000000Z",
+      "updated_at": "2025-10-06T07:05:13.000000Z"
+    }
+  ]
 }
 ```
+
+**Campos adicionales explicados:**
+- `content`: Contenido estructurado de la lección (puede ser null o un array de objetos)
+- `difficulty_label`: Versión formateada de la dificultad
+- `formatted_duration`: Duración en formato legible
+- `progress_count`: Número de progresos registrados para esta lección
+- `gestures`: Array de gestos asociados a la lección (solo en endpoint show)
 
 ### Endpoints
 
@@ -141,7 +171,12 @@ DELETE /api/courses/{id}
 GET /api/lessons
 ```
 
-**Respuesta:**
+**Headers requeridos:**
+```http
+Authorization: Bearer {token}
+```
+
+**Respuesta exitosa (200):**
 ```json
 {
   "success": true,
@@ -149,19 +184,74 @@ GET /api/lessons
     {
       "id": 1,
       "course_id": 1,
-      "name": "Saludos básicos",
+      "name": "Leccion de Prueba",
       "level_number": 1,
-      "description": "Aprende los saludos más comunes en LSP",
+      "description": "Esta es una leccion de prueba para probar endpoints",
       "difficulty": "fácil",
       "time_minutes": 15,
-      "created_at": "2025-09-29T22:00:00Z",
-      "updated_at": "2025-09-29T22:00:00Z",
+      "created_at": "2025-10-05T21:11:14.000000Z",
+      "updated_at": "2025-10-05T21:11:14.000000Z",
+      "content": null,
+      "difficulty_label": "Fácil",
+      "formatted_duration": "15 min",
+      "progress_count": 0,
       "course": {
         "id": 1,
-        "name": "Curso Básico de LSP"
+        "name": "Curso de Prueba",
+        "description": "Curso para probar endpoints",
+        "image_path": "https://i.ytimg.com/vi/HjOOGujV-LU/maxresdefault.jpg",
+        "color": "#3498db",
+        "created_at": "2025-10-05T21:09:50.000000Z",
+        "updated_at": "2025-10-06T00:05:17.000000Z"
+      }
+    },
+    {
+      "id": 2,
+      "course_id": 1,
+      "name": "Leccion 02 de pruebas",
+      "level_number": 2,
+      "description": "DESCRIPCIÓN DE LA SEGUNDA LECCIÓN DE PRUEBAS.",
+      "difficulty": "fácil",
+      "time_minutes": 5,
+      "created_at": "2025-10-06T08:49:55.000000Z",
+      "updated_at": "2025-10-06T08:49:55.000000Z",
+      "content": [
+        {
+          "index": 0,
+          "titulo": "ASD",
+          "descripcion": "ASDAS",
+          "contenido": "ASDASDASD",
+          "media": {
+            "tipo": "image",
+            "url": "https://i.pinimg.com/474x/59/5e/ef/595eef2e2109829e64648b4438802849.jpg"
+          }
+        }
+      ],
+      "difficulty_label": "Fácil",
+      "formatted_duration": "5 min",
+      "progress_count": 0,
+      "course": {
+        "id": 1,
+        "name": "Curso de Prueba",
+        "description": "Curso para probar endpoints",
+        "image_path": "https://i.ytimg.com/vi/HjOOGujV-LU/maxresdefault.jpg",
+        "color": "#3498db",
+        "created_at": "2025-10-05T21:09:50.000000Z",
+        "updated_at": "2025-10-06T00:05:17.000000Z"
       }
     }
-  ]
+  ],
+  "meta": {
+    "total": 2,
+    "message": "Lecciones obtenidas exitosamente"
+  }
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
 }
 ```
 
@@ -232,6 +322,85 @@ GET /api/courses/{course_id}/lessons
 GET /api/lessons/{id}
 ```
 
+**Headers requeridos:**
+```http
+Authorization: Bearer {token}
+```
+
+**Respuesta exitosa (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "course_id": 1,
+    "name": "Leccion de Prueba",
+    "level_number": 1,
+    "description": "Esta es una leccion de prueba para probar endpoints",
+    "difficulty": "fácil",
+    "time_minutes": 15,
+    "created_at": "2025-10-05T21:11:14.000000Z",
+    "updated_at": "2025-10-05T21:11:14.000000Z",
+    "content": null,
+    "difficulty_label": "Fácil",
+    "formatted_duration": "15 min",
+    "progress_count": 0,
+    "course": {
+      "id": 1,
+      "name": "Curso de Prueba",
+      "description": "Curso para probar endpoints",
+      "image_path": "https://i.ytimg.com/vi/HjOOGujV-LU/maxresdefault.jpg",
+      "color": "#3498db",
+      "created_at": "2025-10-05T21:09:50.000000Z",
+      "updated_at": "2025-10-06T00:05:17.000000Z"
+    },
+    "gestures": [
+      {
+        "id": 6,
+        "lesson_id": 1,
+        "gesture_data": {
+          "name": "pruebaaa",
+          "frames": [
+            {
+              "id": 1759734292423,
+              "timestamp": "2025-10-06T07:04:52.423Z",
+              "landmarks": [...],
+              "landmarksNormalizados": [...],
+              "handedness": [...],
+              "gestureName": "pruebaaa",
+              "frameIndex": 0,
+              "sequenceMetadata": {...}
+            }
+          ],
+          "frameCount": 3,
+          "isSequential": true
+        },
+        "created_at": "2025-10-06T07:05:13.000000Z",
+        "updated_at": "2025-10-06T07:05:13.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "gestures_count": 1,
+    "message": "Lección obtenida exitosamente"
+  }
+}
+```
+
+**Error - Lección no encontrada (404):**
+```json
+{
+  "message": "No query results for model [App\\Models\\Lesson] 999"
+}
+```
+
+**Error de autenticación (401):**
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
 #### 📝 Actualizar una lección
 ```http
 PUT /api/lessons/{id}
@@ -240,6 +409,69 @@ PUT /api/lessons/{id}
 #### 📝 Eliminar una lección
 ```http
 DELETE /api/lessons/{id}
+```
+
+---
+
+## 🔄 Códigos de Respuesta para Lecciones
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | OK - Operación exitosa |
+| 201 | Created - Lección creada exitosamente |
+| 401 | Unauthorized - Token de autenticación requerido |
+| 404 | Not Found - Lección no encontrada |
+| 422 | Unprocessable Entity - Error de validación en los datos |
+| 500 | Internal Server Error - Error interno del servidor |
+
+---
+
+## 📝 Notas Importantes sobre Lecciones
+
+1. **Autenticación requerida:** Todos los endpoints de lecciones requieren un token Bearer válido.
+2. **Relación con cursos:** Las lecciones deben estar asociadas a cursos existentes.
+3. **Contenido estructurado:** El campo `content` puede contener un array de objetos con la estructura del contenido de la lección.
+4. **Campos calculados:** `difficulty_label`, `formatted_duration` y `progress_count` son campos calculados automáticamente.
+5. **Relaciones cargadas:** El endpoint `show` incluye los gestos asociados, mientras que `index` no.
+6. **Ordenamiento:** Las lecciones se ordenan por `course_id` y luego por `level_number`.
+
+---
+
+## 🧪 Ejemplos de Uso - Lecciones (Probados)
+
+### Autenticación
+Primero debes autenticarte para obtener el token:
+
+```powershell
+$loginResult = Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/login" -Method Post -ContentType "application/json" -Body '{"email":"admin@gmail.com","password":"admin1234"}'
+$token = $loginResult.token
+$headers = @{"Authorization" = "Bearer $token"}
+```
+
+### Obtener todas las lecciones
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/lessons" -Method Get -Headers $headers
+```
+
+### Obtener una lección específica
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/lessons/1" -Method Get -Headers $headers
+```
+
+### Usando cURL (alternativo)
+```bash
+# Login
+curl -X POST "http://127.0.0.1:8000/api/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@gmail.com","password":"admin1234"}'
+
+# Listar lecciones (reemplaza YOUR_TOKEN con el token obtenido)
+curl -X GET "http://127.0.0.1:8000/api/lessons" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Obtener lección específica
+curl -X GET "http://127.0.0.1:8000/api/lessons/1" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ---

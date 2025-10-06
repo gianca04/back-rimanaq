@@ -158,7 +158,10 @@ class GestureCaptureSystem {
   }
 
   captureFrame() {
-    this.captureManager.captureFrame();
+    // Usar el cronómetro del UIManager antes de capturar
+    this.uiManager.captureWithTimer(() => {
+      this.captureManager.captureFrame();
+    });
   }
 
   finishSequence() {
