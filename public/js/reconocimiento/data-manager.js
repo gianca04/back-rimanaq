@@ -3,6 +3,34 @@
 class DataManager {
   constructor(gestureSystem) {
     this.gestureSystem = gestureSystem;
+    this.apiBaseUrl = '/api';
+    this.authToken = this.getAuthToken();
+  }
+
+  getAuthToken() {
+    // Intentar múltiples fuentes para el token
+    let token = localStorage.getItem('auth_token') || 
+                sessionStorage.getItem('auth_token') || 
+                document.querySelector('meta[name="api-token"]')?.getAttribute('content');
+    
+    // Si no hay token, mostrar advertencia pero no impedir el funcionamiento
+    if (!token) {
+      console.warn('No se encontró token de autenticación. Las funciones de API pueden fallar.');
+      // Para propósitos de desarrollo, podemos crear un token temporal
+      // En producción, esto debería redirigir al login
+    }
+    
+    return token;
+  }
+
+  checkAuthToken() {
+    if (!this.authToken) {
+      console.warn('No se encontró token de autenticación, continuando sin autenticación.');
+      // En desarrollo, permitir continuar sin token
+      // En producción, cambiar esto para requerir autenticación
+      return true;
+    }
+    return true;
   }
 
   exportGesture(gestureIndex) {
@@ -158,5 +186,489 @@ class DataManager {
 
   saveSavedGestures() {
     localStorage.setItem("savedGestures", JSON.stringify(this.gestureSystem.savedGestures));
+  }
+
+  // === NUEVAS FUNCIONES PARA API ===
+
+  async loadCourses() {
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Solo agregar Authorization si hay token
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
+
+      const response = await fetch(`${this.apiBaseUrl}/courses`, {
+        headers: headers
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.success ? data.data : [];
+    } catch (error) {
+      console.error('Error loading courses:', error);
+      return [];
+    }
+  }
+
+  async loadLessons(courseId = null) {
+    try {
+      const url = courseId 
+        ? `${this.apiBaseUrl}/courses/${courseId}/lessons`
+        : `${this.apiBaseUrl}/lessons`;
+      
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Solo agregar Authorization si hay token
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
+
+      const response = await fetch(url, {
+        headers: headers
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.success ? data.data : [];
+    } catch (error) {
+      console.error('Error loading lessons:', error);
+      return [];
+    }
+  }
+
+  async saveGestureToAPI(gestureData, lessonId) {
+    try {
+      const formData = {
+        lesson_id: parseInt(lessonId),
+        gesture_data: {
+          id: gestureData.id,
+          name: gestureData.name,
+          frames: gestureData.frames,
+          frameCount: gestureData.frameCount,
+          isSequential: gestureData.isSequential
+        }
+      };
+
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Solo agregar Authorization si hay token
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
+
+      const response = await fetch(`${this.apiBaseUrl}/gestures`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Error al guardar el gesto');
+      }
+
+      return {
+        success: true,
+        message: result.message || 'Gesto guardado exitosamente',
+        data: result.data
+      };
+    } catch (error) {
+      console.error('Error saving gesture to API:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al conectar con el servidor'
+      };
+    }
+  }
+
+  showSaveGestureModal(gestureIndex) {
+    if (!this.checkAuthToken()) {
+      return;
+    }
+
+    if (this.gestureSystem.savedGestures.length === 0) {
+      alert("No hay gestos para guardar.");
+      return;
+    }
+
+    if (gestureIndex < 0 || gestureIndex >= this.gestureSystem.savedGestures.length) {
+      alert("Gesto no válido para guardar.");
+      return;
+    }
+
+    const gesture = this.gestureSystem.savedGestures[gestureIndex];
+    
+    // Crear modal dinámicamente
+    const modalHtml = `
+      <div id="saveGestureModal" class="modal" style="display: block;">
+        <div class="modal-content">
+          <span class="close" onclick="this.closeSaveModal()">&times;</span>
+          <h2>💾 Guardar Gesto en Base de Datos</h2>
+          <form id="saveGestureForm">
+            <div class="form-group">
+              <label for="gestureNameDB">Nombre del Gesto:</label>
+              <input type="text" id="gestureNameDB" value="${gesture.name}" readonly>
+            </div>
+            
+            <div class="form-group">
+              <label for="coursesSelect">Curso:</label>
+              <select id="coursesSelect" required>
+                <option value="">Seleccionar curso...</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="lessonsSelect">Lección:</label>
+              <select id="lessonsSelect" required disabled>
+                <option value="">Primero selecciona un curso</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Información del gesto:</label>
+              <div class="gesture-summary">
+                <p><strong>Frames:</strong> ${gesture.frameCount}</p>
+                <p><strong>Tipo:</strong> ${gesture.isSequential ? 'Secuencial' : 'Estático'}</p>
+                <p><strong>Creado:</strong> ${new Date(gesture.createdAt).toLocaleString()}</p>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-success">💾 Guardar en BD</button>
+              <button type="button" class="btn btn-secondary" onclick="this.closeSaveModal()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Configurar event listeners
+    this.setupSaveModalEventListeners(gesture);
+    
+    // Cargar cursos
+    this.loadCoursesForModal();
+  }
+
+  setupSaveModalEventListeners(gesture) {
+    const modal = document.getElementById('saveGestureModal');
+    const form = document.getElementById('saveGestureForm');
+    const coursesSelect = document.getElementById('coursesSelect');
+    const lessonsSelect = document.getElementById('lessonsSelect');
+
+    // Cerrar modal
+    window.closeSaveModal = () => {
+      modal.remove();
+    };
+
+    // Cerrar con escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal) {
+        modal.remove();
+      }
+    });
+
+    // Cerrar clickeando fuera
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+
+    // Cambio de curso
+    coursesSelect.addEventListener('change', async (e) => {
+      const courseId = e.target.value;
+      lessonsSelect.disabled = true;
+      lessonsSelect.innerHTML = '<option value="">Cargando lecciones...</option>';
+      
+      if (courseId) {
+        const lessons = await this.loadLessons(courseId);
+        lessonsSelect.innerHTML = '<option value="">Seleccionar lección...</option>';
+        lessons.forEach(lesson => {
+          const option = new Option(lesson.name, lesson.id);
+          lessonsSelect.appendChild(option);
+        });
+        lessonsSelect.disabled = false;
+      } else {
+        lessonsSelect.innerHTML = '<option value="">Primero selecciona un curso</option>';
+      }
+    });
+
+    // Submit del formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const lessonId = lessonsSelect.value;
+      if (!lessonId) {
+        alert('Por favor selecciona una lección');
+        return;
+      }
+
+      // Mostrar loading
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = '⏳ Guardando...';
+      submitBtn.disabled = true;
+
+      try {
+        const result = await this.saveGestureToAPI(gesture, lessonId);
+        
+        if (result.success) {
+          alert(result.message);
+          modal.remove();
+          this.gestureSystem.statusText.textContent = `Gesto "${gesture.name}" guardado en la base de datos`;
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  async loadCoursesForModal() {
+    const coursesSelect = document.getElementById('coursesSelect');
+    coursesSelect.innerHTML = '<option value="">Cargando cursos...</option>';
+    
+    try {
+      const courses = await this.loadCourses();
+      coursesSelect.innerHTML = '<option value="">Seleccionar curso...</option>';
+      
+      courses.forEach(course => {
+        const option = new Option(course.name, course.id);
+        coursesSelect.appendChild(option);
+      });
+      
+      if (courses.length === 0) {
+        coursesSelect.innerHTML = '<option value="">No hay cursos disponibles</option>';
+      }
+    } catch (error) {
+      coursesSelect.innerHTML = '<option value="">Error al cargar cursos</option>';
+      console.error('Error:', error);
+    }
+  }
+
+  showSaveAllGesturesModal() {
+    if (!this.checkAuthToken()) {
+      return;
+    }
+
+    if (this.gestureSystem.savedGestures.length === 0) {
+      alert("No hay gestos para guardar.");
+      return;
+    }
+
+    // Crear modal para guardar todos los gestos
+    const modalHtml = `
+      <div id="saveAllGesturesModal" class="modal" style="display: block;">
+        <div class="modal-content">
+          <span class="close" onclick="this.closeAllSaveModal()">&times;</span>
+          <h2>💾 Guardar Todos los Gestos en Base de Datos</h2>
+          <div class="gestures-list">
+            <h4>Gestos a guardar: ${this.gestureSystem.savedGestures.length}</h4>
+            <ul style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+              ${this.gestureSystem.savedGestures.map(gesture => 
+                `<li><strong>${gesture.name}</strong> - ${gesture.frameCount} frames</li>`
+              ).join('')}
+            </ul>
+          </div>
+          
+          <form id="saveAllGesturesForm">
+            <div class="form-group">
+              <label for="coursesSelectAll">Curso:</label>
+              <select id="coursesSelectAll" required>
+                <option value="">Seleccionar curso...</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="lessonsSelectAll">Lección:</label>
+              <select id="lessonsSelectAll" required disabled>
+                <option value="">Primero selecciona un curso</option>
+              </select>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-success">💾 Guardar Todos</button>
+              <button type="button" class="btn btn-secondary" onclick="this.closeAllSaveModal()">Cancelar</button>
+            </div>
+          </form>
+          
+          <div id="saveAllProgress" style="display: none;">
+            <h4>Progreso de guardado:</h4>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
+              <div id="progressBar" style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+                <div id="progressFill" style="background: #28a745; height: 100%; width: 0%; transition: width 0.3s;"></div>
+              </div>
+              <p id="progressText" style="text-align: center; margin: 10px 0;">0 / ${this.gestureSystem.savedGestures.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Configurar event listeners
+    this.setupSaveAllModalEventListeners();
+    
+    // Cargar cursos
+    this.loadCoursesForAllModal();
+  }
+
+  setupSaveAllModalEventListeners() {
+    const modal = document.getElementById('saveAllGesturesModal');
+    const form = document.getElementById('saveAllGesturesForm');
+    const coursesSelect = document.getElementById('coursesSelectAll');
+    const lessonsSelect = document.getElementById('lessonsSelectAll');
+
+    // Cerrar modal
+    window.closeAllSaveModal = () => {
+      modal.remove();
+    };
+
+    // Cerrar con escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal) {
+        modal.remove();
+      }
+    });
+
+    // Cerrar clickeando fuera
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+
+    // Cambio de curso
+    coursesSelect.addEventListener('change', async (e) => {
+      const courseId = e.target.value;
+      lessonsSelect.disabled = true;
+      lessonsSelect.innerHTML = '<option value="">Cargando lecciones...</option>';
+      
+      if (courseId) {
+        const lessons = await this.loadLessons(courseId);
+        lessonsSelect.innerHTML = '<option value="">Seleccionar lección...</option>';
+        lessons.forEach(lesson => {
+          const option = new Option(lesson.name, lesson.id);
+          lessonsSelect.appendChild(option);
+        });
+        lessonsSelect.disabled = false;
+      } else {
+        lessonsSelect.innerHTML = '<option value="">Primero selecciona un curso</option>';
+      }
+    });
+
+    // Submit del formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const lessonId = lessonsSelect.value;
+      if (!lessonId) {
+        alert('Por favor selecciona una lección');
+        return;
+      }
+
+      await this.saveAllGesturesToAPI(lessonId, modal);
+    });
+  }
+
+  async saveAllGesturesToAPI(lessonId, modal) {
+    const form = document.getElementById('saveAllGesturesForm');
+    const progressDiv = document.getElementById('saveAllProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    // Mostrar progreso y ocultar formulario
+    form.style.display = 'none';
+    progressDiv.style.display = 'block';
+
+    let savedCount = 0;
+    let errorCount = 0;
+    const totalGestures = this.gestureSystem.savedGestures.length;
+
+    for (let i = 0; i < this.gestureSystem.savedGestures.length; i++) {
+      const gesture = this.gestureSystem.savedGestures[i];
+      
+      try {
+        const result = await this.saveGestureToAPI(gesture, lessonId);
+        
+        if (result.success) {
+          savedCount++;
+        } else {
+          errorCount++;
+          console.error(`Error saving ${gesture.name}:`, result.message);
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(`Error saving ${gesture.name}:`, error);
+      }
+
+      // Actualizar progreso
+      const progress = ((i + 1) / totalGestures) * 100;
+      progressFill.style.width = progress + '%';
+      progressText.textContent = `${savedCount} guardados, ${errorCount} errores / ${totalGestures} gestos`;
+      
+      // Pequeño delay para visualizar el progreso
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    // Mostrar resultado final
+    const successRate = (savedCount / totalGestures) * 100;
+    let message = `Proceso completado:\n`;
+    message += `✅ ${savedCount} gestos guardados exitosamente\n`;
+    if (errorCount > 0) {
+      message += `❌ ${errorCount} gestos con errores\n`;
+    }
+    message += `📊 Tasa de éxito: ${successRate.toFixed(1)}%`;
+
+    alert(message);
+    modal.remove();
+    
+    this.gestureSystem.statusText.textContent = `Guardado masivo completado: ${savedCount}/${totalGestures} gestos`;
+  }
+
+  async loadCoursesForAllModal() {
+    const coursesSelect = document.getElementById('coursesSelectAll');
+    coursesSelect.innerHTML = '<option value="">Cargando cursos...</option>';
+    
+    try {
+      const courses = await this.loadCourses();
+      coursesSelect.innerHTML = '<option value="">Seleccionar curso...</option>';
+      
+      courses.forEach(course => {
+        const option = new Option(course.name, course.id);
+        coursesSelect.appendChild(option);
+      });
+      
+      if (courses.length === 0) {
+        coursesSelect.innerHTML = '<option value="">No hay cursos disponibles</option>';
+      }
+    } catch (error) {
+      coursesSelect.innerHTML = '<option value="">Error al cargar cursos</option>';
+      console.error('Error:', error);
+    }
   }
 }

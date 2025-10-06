@@ -136,6 +136,7 @@
             </div>
 
             <div class="export-section">
+                <button id="saveAllToDBBtn" class="btn" style="background: #28a745; color: white;">💾 Guardar Todos en BD</button>
                 <button id="exportAllBtn" class="btn btn-primary">Exportar Todos</button>
                 <button id="importGestureBtn" class="btn btn-success">Importar Gesto</button>
                 <input type="file" id="importGestureFile" accept=".json" title="Seleccionar archivo JSON de gesto individual">
@@ -186,6 +187,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <!-- Scripts del sistema organizados por funcionalidad -->
+<script src="{{ asset('js/auth-helper.js') }}"></script>
 <script src="{{ asset('js/reconocimiento/landmark-normalizer.js') }}"></script>
 <script src="{{ asset('js/reconocimiento/data-manager.js') }}"></script>
 <script src="{{ asset('js/reconocimiento/capture-manager.js') }}"></script>

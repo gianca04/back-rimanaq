@@ -128,6 +128,7 @@ class UIManager {
                                 </div>
                             </div>
                             <div class="gesture-actions">
+                                <button class="save-btn" onclick="gestureSystem.dataManager.showSaveGestureModal(${index})" title="Guardar en base de datos">💾</button>
                                 <button class="export-btn" onclick="gestureSystem.dataManager.exportGesture(${index})" title="Exportar gesto">📤</button>
                                 <button class="delete-btn" onclick="gestureSystem.uiManager.deleteGesture(${
                                   gesture.id

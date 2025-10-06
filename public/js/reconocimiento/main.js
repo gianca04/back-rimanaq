@@ -113,6 +113,9 @@ class GestureCaptureSystem {
 
     // Eventos de exportación/importación
     document
+      .getElementById("saveAllToDBBtn")
+      .addEventListener("click", () => this.saveAllGesturesToDB());
+    document
       .getElementById("exportAllBtn")
       .addEventListener("click", () => this.exportAllGestures());
     document
@@ -208,6 +211,10 @@ class GestureCaptureSystem {
 
   clearAllGestures() {
     this.uiManager.clearAllGestures();
+  }
+
+  saveAllGesturesToDB() {
+    this.dataManager.showSaveAllGesturesModal();
   }
 
   exportAllGestures() {
