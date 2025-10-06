@@ -38,3 +38,16 @@ Route::get('/dashboard/gestures/create', function () {
 Route::get('/dashboard/gestures/edit/{id}', function ($id) {
     return view('gesture.edit', compact('id'));
 })->name('web.gestures.edit');
+
+// Rutas para la vista de cursos
+Route::get('/dashboard/courses', function () {
+    return view('course.index');
+})->name('web.courses.index');
+
+Route::get('/dashboard/courses/create', function () {
+    return view('course.create');
+})->name('web.courses.create');
+
+Route::get('/dashboard/courses/edit/{id}', function ($id) {
+    return view('course.edit', compact('id'));
+})->name('web.courses.edit');

@@ -112,7 +112,7 @@ class UIManager {
     } else {
       savedGesturesDiv.innerHTML = this.gestureSystem.savedGestures
         .map(
-          (gesture) =>
+          (gesture, index) =>
             `<div class="gesture-item">
                             <div>
                                 <span class="gesture-name">${
@@ -127,9 +127,12 @@ class UIManager {
                                     ).toLocaleDateString()}
                                 </div>
                             </div>
-                            <button class="delete-btn" onclick="gestureSystem.uiManager.deleteGesture(${
-                              gesture.id
-                            })">Eliminar</button>
+                            <div class="gesture-actions">
+                                <button class="export-btn" onclick="gestureSystem.dataManager.exportGesture(${index})" title="Exportar gesto">📤</button>
+                                <button class="delete-btn" onclick="gestureSystem.uiManager.deleteGesture(${
+                                  gesture.id
+                                })" title="Eliminar gesto">🗑️</button>
+                            </div>
                         </div>`
         )
         .join("");

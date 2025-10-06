@@ -111,18 +111,18 @@ class GestureCaptureSystem {
       .getElementById("toleranceSlider")
       .addEventListener("input", (e) => this.updateTolerance(e));
 
-    // Eventos de exportación
+    // Eventos de exportación/importación
     document
-      .getElementById("exportBtn")
-      .addEventListener("click", () => this.exportDataset());
+      .getElementById("exportAllBtn")
+      .addEventListener("click", () => this.exportAllGestures());
     document
-      .getElementById("importBtn")
+      .getElementById("importGestureBtn")
       .addEventListener("click", () =>
-        document.getElementById("importFile").click()
+        document.getElementById("importGestureFile").click()
       );
     document
-      .getElementById("importFile")
-      .addEventListener("change", (e) => this.importDataset(e));
+      .getElementById("importGestureFile")
+      .addEventListener("change", (e) => this.importGesture(e));
     document
       .getElementById("clearAllBtn")
       .addEventListener("click", () => this.clearAllGestures());
@@ -210,12 +210,12 @@ class GestureCaptureSystem {
     this.uiManager.clearAllGestures();
   }
 
-  exportDataset() {
-    this.dataManager.exportDataset();
+  exportAllGestures() {
+    this.dataManager.exportAllGestures();
   }
 
-  importDataset(event) {
-    this.dataManager.importDataset(event);
+  importGesture(event) {
+    this.dataManager.importGesture(event);
   }
 
   saveSavedGestures() {

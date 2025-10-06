@@ -21,7 +21,7 @@
     const gestureForm = document.getElementById('gestureForm');
     const lessonSelect = document.getElementById('lesson_id');
     const token = localStorage.getItem('auth_token');
-    const gestureId = window.location.pathname.split('/').pop();
+    const gestureId = '{{ $id }}';
 
     async function loadLessons() {
         try {
