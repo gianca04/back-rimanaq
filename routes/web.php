@@ -13,14 +13,6 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('web.dashboard');
 
-// Rutas para la gestión web de cursos
-Route::prefix('dashboard')->name('web.')->group(function () {
-    Route::get('/courses', [CourseWebController::class, 'index'])->name('courses.index');
-    Route::get('/courses/create', [CourseWebController::class, 'create'])->name('courses.create');
-    Route::get('/courses/{id}', [CourseWebController::class, 'show'])->name('courses.show');
-    Route::get('/courses/{id}/edit', [CourseWebController::class, 'edit'])->name('courses.edit');
-});
-
 // Rutas para la vista de lecciones
 Route::get('/dashboard/lessons', function () {
     return view('lesson.index');
@@ -46,4 +38,3 @@ Route::get('/dashboard/gestures/create', function () {
 Route::get('/dashboard/gestures/edit/{id}', function ($id) {
     return view('gesture.edit', compact('id'));
 })->name('web.gestures.edit');
-
