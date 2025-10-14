@@ -130,18 +130,69 @@ php artisan serve
 
 ## Documentación de la API
 
-La documentación completa de la API está disponible en `API_DOCUMENTATION.md`. Incluye:
-
-- **Endpoints de Cursos**: CRUD completo para gestión de cursos
-- **Endpoints de Lecciones**: Gestión de contenido educativo
-- **Endpoints de Gestos**: Administración de movimientos
-- **Endpoints de Progreso**: Seguimiento de avance (básico)
-- **Autenticación**: Login, registro y gestión de tokens
-
 ### Base URL
 ```
 http://localhost:8000/api
 ```
+
+### Endpoints Disponibles
+
+#### Autenticación (Rutas Públicas)
+- `POST /register` - Registro de nuevos usuarios
+- `POST /login` - Inicio de sesión
+- `GET /login` - Endpoint para APIs (devuelve 401 si no autenticado)
+
+#### Autenticación (Rutas Protegidas)
+- `POST /logout` - Cerrar sesión
+- `GET /user` - Obtener datos del usuario autenticado
+
+#### Usuarios
+- `GET /users` - Listar todos los usuarios
+- `GET /users/{user}` - Obtener usuario específico
+
+#### Cursos (CRUD Completo)
+- `GET /courses` - Listar todos los cursos
+- `POST /courses` - Crear nuevo curso
+- `GET /courses/{course}` - Obtener curso específico
+- `PUT/PATCH /courses/{course}` - Actualizar curso
+- `DELETE /courses/{course}` - Eliminar curso
+
+#### Lecciones (CRUD Completo)
+- `GET /lessons` - Listar todas las lecciones
+- `POST /lessons` - Crear nueva lección
+- `GET /lessons/{lesson}` - Obtener lección específica
+- `PUT/PATCH /lessons/{lesson}` - Actualizar lección
+- `DELETE /lessons/{lesson}` - Eliminar lección
+
+#### Gestos (CRUD Completo)
+- `GET /gestures` - Listar todos los gestos
+- `POST /gestures` - Crear nuevo gesto
+- `GET /gestures/{gesture}` - Obtener gesto específico
+- `PUT/PATCH /gestures/{gesture}` - Actualizar gesto
+- `DELETE /gestures/{gesture}` - Eliminar gesto
+
+#### Progreso (CRUD Completo)
+- `GET /progress` - Listar todo el progreso
+- `POST /progress` - Crear registro de progreso
+- `GET /progress/{progress}` - Obtener progreso específico
+- `PUT/PATCH /progress/{progress}` - Actualizar progreso
+- `DELETE /progress/{progress}` - Eliminar progreso
+
+#### Relaciones y Consultas Específicas
+- `GET /courses/{course}/lessons` - Lecciones de un curso específico
+- `GET /lessons/{lesson}/gestures` - Gestos de una lección específica
+
+#### Progreso por Recurso
+- `GET /users/{user}/progress` - Progreso de un usuario específico
+- `GET /courses/{course}/progress` - Progreso de un curso específico
+- `GET /lessons/{lesson}/progress` - Progreso de una lección específica
+
+#### Acciones Específicas de Progreso
+- `POST /progress/mark-completed` - Marcar lección como completada
+- `POST /progress/increment-attempts` - Incrementar intentos de una lección
+
+### Documentación Completa
+Para más detalles sobre parámetros, respuestas y ejemplos, consulta `API_DOCUMENTATION.md`.
 
 ## Roadmap de Mejoras
 
