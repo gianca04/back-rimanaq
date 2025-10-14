@@ -47,18 +47,11 @@
         </div>
     </div>
 
-    @php
-        // Definir el JSON por defecto simple para evitar problemas de sintaxis en Blade
-        $defaultContentJson = '[]';
-        $contentValue = old('content', $defaultContentJson);
-    @endphp
-
     <!-- Content -->
     <div class="mb-3">
         <label class="form-label">Contenido de la lección *</label>
-        <input type="hidden" name="content" id="content" value="{{ htmlspecialchars($contentValue, ENT_QUOTES, 'UTF-8') }}">
-        <!-- Include content form - pasamos array vacío para evitar errores de Blade -->
-        @include('content.form')
+        <input type="hidden" name="content" id="content" value='[]'>
+        <!-- Include content form -->
         <div class="invalid-feedback"></div>
     </div>
 
@@ -72,222 +65,65 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Función para limpiar el formulario de lección
-        window.clearLessonForm = function() {
-            // Limpiar campos básicos
-            document.getElementById('course_id').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('level_number').value = '';
-            document.getElementById('description').value = '';
-            document.getElementById('difficulty').value = '';
-            document.getElementById('time_minutes').value = '';
-            
-            // Limpiar contenido
-            const contentField = document.getElementById('content');
-            if (contentField) {
-                contentField.value = '[]';
-            }
-            
-            // Limpiar formulario de contenido si existe la función
-            if (window.clearContentForm) {
-                window.clearContentForm();
-            }
-            
-            // Remover clases de validación
-            document.querySelectorAll('.is-invalid').forEach(el => {
-                el.classList.remove('is-invalid');
-            });
-            
-            // Limpiar mensajes de error
-            document.querySelectorAll('.invalid-feedback').forEach(el => {
-                el.textContent = '';
-            });
-            
-            // Remover ID de lección del formulario (para modo creación)
-            const form = document.getElementById('lessonForm');
-            if (form) {
-                delete form.dataset.lessonId;
-            }
-            
-            console.log('Formulario de lección limpiado');
-        };
-
         // Función para cargar datos de la lección al editar
         window.loadLessonData = function(lessonData) {
+            console.log('📥 Cargando datos de lección:', lessonData);
+            
             if (lessonData) {
-                // Cargar datos básicos del formulario
-                document.getElementById('course_id').value = lessonData.course_id || '';
-                document.getElementById('name').value = lessonData.name || '';
-                document.getElementById('level_number').value = lessonData.level_number || '';
-                document.getElementById('description').value = lessonData.description || '';
-                document.getElementById('difficulty').value = lessonData.difficulty || '';
-                document.getElementById('time_minutes').value = lessonData.time_minutes || '';
+                // PASO 1: Reinicializar completamente el formulario
+                console.log('🔄 PASO 1: Reinicializando formulario...');
+                window.reinitializeLessonForm();
                 
-                // Cargar contenido dinámico de la lección
-                if (lessonData.content) {
-                    console.log('=== PROCESANDO CONTENIDO DE LECCIÓN ===');
-                    console.log('Contenido completo recibido:', lessonData.content);
-                    console.log('Tipo de contenido:', typeof lessonData.content);
-                    console.log('Es array:', Array.isArray(lessonData.content));
-                    console.log('Cantidad de elementos:', Array.isArray(lessonData.content) ? lessonData.content.length : 'N/A');
+                // PASO 2: Esperar y cargar los datos básicos
+                setTimeout(() => {
+                    console.log('📝 PASO 2: Cargando datos básicos...');
                     
-                    let contentValue;
+                    document.getElementById('course_id').value = lessonData.course_id || '';
+                    document.getElementById('name').value = lessonData.name || '';
+                    document.getElementById('level_number').value = lessonData.level_number || '';
+                    document.getElementById('description').value = lessonData.description || '';
+                    document.getElementById('difficulty').value = lessonData.difficulty || '';
+                    document.getElementById('time_minutes').value = lessonData.time_minutes || '';
                     
-                    // El endpoint devuelve content como array de objetos
-                    if (Array.isArray(lessonData.content) && lessonData.content.length > 0) {
-                        // Es un array con elementos (caso normal del endpoint)
-                        contentValue = JSON.stringify(lessonData.content);
-                        console.log('✅ Array de contenido convertido a JSON:');
-                        console.log('Elementos encontrados:');
-                        lessonData.content.forEach((item, index) => {
-                            console.log(`  ${index + 1}. "${item.titulo}" (${item.media?.tipo})`);
-                        });
-                        console.log('JSON final:', contentValue);
-                    } else if (Array.isArray(lessonData.content) && lessonData.content.length === 0) {
-                        // Es un array vacío
-                        contentValue = '[]';
-                        console.log('⚠️ Array de contenido vacío');
-                    } else if (typeof lessonData.content === 'string') {
-                        // Es un string JSON (menos común)
-                        contentValue = lessonData.content;
-                        console.log('📝 Contenido ya es string JSON:', contentValue);
-                    } else if (typeof lessonData.content === 'object') {
-                        // Es un objeto, convertir a JSON
-                        contentValue = JSON.stringify(lessonData.content);
-                        console.log('🔄 Objeto convertido a JSON:', contentValue);
-                    } else {
-                        // Fallback: crear array vacío
-                        contentValue = '[]';
-                        console.log('❌ Contenido no válido, usando array vacío');
+                    // PASO 3: Cargar contenido específico
+                    console.log('🎯 PASO 3: Cargando contenido...');
+                    
+                    const contentField = document.getElementById('content');
+                    
+                    // Manejar el contenido que viene del API
+                    let contentValue = '[]'; // Valor por defecto
+                    
+                    if (lessonData.content !== null && lessonData.content !== undefined) {
+                        if (typeof lessonData.content === 'string') {
+                            // Si es string, usarlo directamente
+                            contentValue = lessonData.content;
+                        } else if (Array.isArray(lessonData.content)) {
+                            // Si es array, convertir a JSON string
+                            contentValue = JSON.stringify(lessonData.content);
+                        } else if (typeof lessonData.content === 'object') {
+                            // Si es objeto, convertir a JSON string
+                            contentValue = JSON.stringify(lessonData.content);
+                        }
                     }
                     
-                    // Actualizar el campo hidden
-                    const contentField = document.getElementById('content');
+                    console.log('📝 Contenido del API:', lessonData.content);
+                    console.log('📝 Contenido procesado para cargar:', contentValue);
+                    
+                    // Establecer el valor en el campo hidden
                     if (contentField) {
                         contentField.value = contentValue;
-                        console.log('Campo hidden actualizado con:', contentValue);
                     }
                     
-                    // Usar la función específica para procesar contenido del endpoint
+                    // PASO 4: Recargar formulario con el contenido procesado
                     setTimeout(() => {
-                        if (window.processEndpointContent && Array.isArray(lessonData.content)) {
-                            // Procesar directamente el array del endpoint (método preferido)
-                            console.log('🎯 Usando processEndpointContent para procesar array del endpoint...');
-                            window.processEndpointContent(lessonData.content);
-                        } else if (window.loadLessonContent) {
-                            // Función que limpia completamente y carga el nuevo contenido (fallback)
-                            console.log('🔄 Usando loadLessonContent con JSON string...');
-                            window.loadLessonContent(contentValue);
-                        } else if (window.jsonToContentArray) {
-                            // Fallback final a la función original
-                            console.log('⚠️ Usando fallback jsonToContentArray...');
+                        if (window.jsonToContentArray) {
+                            console.log('🔄 PASO 4: Aplicando contenido procesado al formulario...');
                             window.jsonToContentArray(contentValue);
-                        } else {
-                            console.error('❌ No se encontraron funciones de carga de contenido');
                         }
-                    }, 150);
-
-        // Función específica para procesar contenido del endpoint
-        window.processEndpointContent = function(contentArray) {
-            console.log('=== PROCESANDO CONTENIDO DEL ENDPOINT ===');
-            console.log('Array recibido:', contentArray);
-            
-            if (!Array.isArray(contentArray)) {
-                console.error('❌ El contenido no es un array válido');
-                return;
-            }
-            
-            // Limpiar el formulario de contenido existente
-            if (window.clearContentForm) {
-                window.clearContentForm();
-            }
-            
-            // Si no hay contenido, mostrar un elemento vacío
-            if (contentArray.length === 0) {
-                console.log('📝 Array vacío, mostrando formulario limpio');
-                return;
-            }
-            
-            // Procesar cada elemento del contenido
-            contentArray.forEach((item, index) => {
-                console.log(`📋 Procesando elemento ${index + 1}:`, item);
-                
-                // Agregar nuevo elemento al formulario si no es el primero
-                if (index > 0 && window.addContentItem) {
-                    window.addContentItem();
-                }
-                
-                // Llenar los campos con los datos del endpoint
-                setTimeout(() => {
-                    // Título
-                    const titleField = document.querySelector(`[name="content_items[${index}][titulo]"]`);
-                    if (titleField && item.titulo) {
-                        titleField.value = item.titulo;
-                        console.log(`✅ Título ${index}: ${item.titulo}`);
-                    }
+                    }, 200);
                     
-                    // Descripción
-                    const descField = document.querySelector(`[name="content_items[${index}][descripcion]"]`);
-                    if (descField && item.descripcion) {
-                        descField.value = item.descripcion;
-                        console.log(`✅ Descripción ${index}: ${item.descripcion}`);
-                    }
-                    
-                    // Contenido
-                    const contentField = document.querySelector(`[name="content_items[${index}][contenido]"]`);
-                    if (contentField && item.contenido) {
-                        contentField.value = item.contenido;
-                        console.log(`✅ Contenido ${index}: ${item.contenido.substring(0, 50)}...`);
-                    }
-                    
-                    // Media - tipo
-                    if (item.media && item.media.tipo) {
-                        const mediaTypeField = document.querySelector(`[name="content_items[${index}][media_tipo]"]`);
-                        if (mediaTypeField) {
-                            mediaTypeField.value = item.media.tipo;
-                            console.log(`✅ Tipo de media ${index}: ${item.media.tipo}`);
-                            
-                            // Disparar evento change para actualizar la UI
-                            mediaTypeField.dispatchEvent(new Event('change'));
-                        }
-                    }
-                    
-                    // Media - URL
-                    if (item.media && item.media.url) {
-                        const mediaUrlField = document.querySelector(`[name="content_items[${index}][media_url]"]`);
-                        if (mediaUrlField) {
-                            mediaUrlField.value = item.media.url;
-                            console.log(`✅ URL de media ${index}: ${item.media.url}`);
-                        }
-                    }
-                    
-                    // Actualizar preview si existe la función
-                    if (window.updateMediaPreview) {
-                        window.updateMediaPreview(index);
-                    }
-                    
-                }, (index * 100) + 50); // Escalonar las asignaciones para evitar conflictos
-            });
-            
-            // Actualizar el JSON hidden después de cargar todo
-            setTimeout(() => {
-                if (window.updateHiddenJson) {
-                    window.updateHiddenJson();
-                    console.log('✅ JSON hidden actualizado después de cargar endpoint content');
-                }
-            }, (contentArray.length * 100) + 200);
-            
-            console.log(`✅ Procesamiento completado: ${contentArray.length} elementos cargados`);
-        };
-                } else {
-                    // Si no hay contenido, limpiar el formulario
-                    console.log('No hay contenido, limpiando formulario...');
-                    setTimeout(() => {
-                        if (window.clearContentForm) {
-                            window.clearContentForm();
-                        }
-                    }, 100);
-                }
+                    console.log('✅ Datos de lección cargados correctamente');
+                }, 600); // Esperar más tiempo para asegurar limpieza completa
             }
         };
         
@@ -360,24 +196,116 @@
             }
         };
 
-        // Inicializar contenido por defecto si hay datos en el campo hidden
-        setTimeout(() => {
+        // Función para limpiar completamente el formulario de lección
+        window.clearLessonForm = function() {
+            console.log('🧹 Limpiando formulario de lección...');
+            
+            // Limpiar campos básicos
+            document.getElementById('course_id').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('level_number').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('difficulty').value = '';
+            document.getElementById('time_minutes').value = '';
+            
+            // Limpiar contenido
             const contentField = document.getElementById('content');
-            if (contentField && contentField.value && contentField.value !== '[]') {
-                console.log('Inicializando contenido desde campo hidden:', contentField.value);
+            if (contentField) {
+                contentField.value = '[]';
                 
-                // Si hay contenido, cargarlo
-                if (window.jsonToContentArray) {
-                    window.jsonToContentArray(contentField.value);
-                }
-            } else {
-                console.log('No hay contenido inicial, usando formulario vacío');
-                
-                // Si no hay contenido, asegurar que hay al menos un item vacío
+                // Limpiar formulario de contenido
                 if (window.clearContentForm) {
                     window.clearContentForm();
                 }
             }
-        }, 200);
+            
+            console.log('✅ Formulario de lección limpiado');
+        };
+
+        // Función para reinicializar completamente el formulario
+        window.reinitializeLessonForm = function() {
+            console.log('🔄 Reinicializando formulario de lección...');
+            
+            // Limpiar todo primero
+            window.clearLessonForm();
+            
+            // Esperar y reinicializar el formulario de contenido
+            setTimeout(() => {
+                if (window.jsonToContentArray) {
+                    console.log('🔄 Forzando reinicialización del formulario de contenido...');
+                    window.jsonToContentArray('[]');
+                }
+            }, 500);
+        };
+
+        // Función específica para mostrar datos de un registro (show/view)
+        window.showLessonData = function(lessonData) {
+            console.log('👀 Mostrando datos de lección para visualización:', lessonData);
+            
+            if (lessonData) {
+                // Cargar datos básicos inmediatamente
+                document.getElementById('course_id').value = lessonData.course_id || '';
+                document.getElementById('name').value = lessonData.name || '';
+                document.getElementById('level_number').value = lessonData.level_number || '';
+                document.getElementById('description').value = lessonData.description || '';
+                document.getElementById('difficulty').value = lessonData.difficulty || '';
+                document.getElementById('time_minutes').value = lessonData.time_minutes || '';
+                
+                // Procesar y mostrar contenido
+                const contentField = document.getElementById('content');
+                let contentForDisplay = '[]';
+                
+                if (lessonData.content !== null && lessonData.content !== undefined) {
+                    if (typeof lessonData.content === 'string') {
+                        contentForDisplay = lessonData.content;
+                    } else {
+                        contentForDisplay = JSON.stringify(lessonData.content);
+                    }
+                }
+                
+                console.log('📋 Contenido para mostrar:', contentForDisplay);
+                
+                if (contentField) {
+                    contentField.value = contentForDisplay;
+                }
+                
+                // Renderizar el contenido en el formulario
+                if (window.jsonToContentArray) {
+                    window.jsonToContentArray(contentForDisplay);
+                }
+                
+                console.log('✅ Datos de lección mostrados correctamente');
+            }
+        };
+
+        // Función de debugging para analizar la respuesta del API
+        window.debugApiResponse = function(apiResponse) {
+            console.log('🔍 DEBUG: Respuesta completa del API:', apiResponse);
+            
+            if (apiResponse && apiResponse.data) {
+                if (Array.isArray(apiResponse.data)) {
+                    console.log('📋 Lista de lecciones encontradas:', apiResponse.data.length);
+                    apiResponse.data.forEach((lesson, index) => {
+                        console.log(`📖 Lección ${index + 1}:`, {
+                            id: lesson.id,
+                            name: lesson.name,
+                            content_type: typeof lesson.content,
+                            content_is_null: lesson.content === null,
+                            content_length: Array.isArray(lesson.content) ? lesson.content.length : 'N/A',
+                            content_preview: lesson.content
+                        });
+                    });
+                } else {
+                    console.log('📖 Lección individual:', {
+                        id: apiResponse.data.id,
+                        name: apiResponse.data.name,
+                        content_type: typeof apiResponse.data.content,
+                        content_is_null: apiResponse.data.content === null,
+                        content_length: Array.isArray(apiResponse.data.content) ? apiResponse.data.content.length : 'N/A',
+                        content_preview: apiResponse.data.content
+                    });
+                }
+            }
+        };
     });
 </script>
