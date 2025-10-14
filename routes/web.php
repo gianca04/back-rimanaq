@@ -31,6 +31,10 @@ Route::get('/dashboard/lessons/edit/{id}', function ($id) {
     return view('lesson.edit', compact('id'));
 })->name('web.lessons.edit');
 
+Route::get('/dashboard/lessons/content-demo', function () {
+    return view('lesson.content-demo');
+})->name('web.lessons.content-demo');
+
 // Rutas para la vista de gestos
 Route::get('/dashboard/gestures', function () {
     return view('gesture.index');

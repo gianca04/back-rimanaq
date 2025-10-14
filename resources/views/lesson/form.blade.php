@@ -51,15 +51,25 @@
     <div class="mb-3">
         <label class="form-label">Contenido de la lección *</label>
         <input type="hidden" name="content" id="content" value='[]'>
-        <!-- Include content form -->
+        @include('lesson.content-form')
         <div class="invalid-feedback"></div>
     </div>
 
 
 
-    <div class="d-flex justify-content-end gap-2">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar lección</button>
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-info btn-sm" onclick="debugContentForm()" title="Debug del contenido">
+                <i class="bi bi-bug"></i> Debug
+            </button>
+            <button type="button" class="btn btn-outline-warning btn-sm" onclick="loadTestContentData()" title="Cargar datos de prueba">
+                <i class="bi bi-file-code"></i> Test Data
+            </button>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar lección</button>
+        </div>
     </div>
 </form>
 
@@ -119,8 +129,11 @@
                         if (window.jsonToContentArray) {
                             console.log('🔄 PASO 4: Aplicando contenido procesado al formulario...');
                             window.jsonToContentArray(contentValue);
+                        } else if (window.contentCRUDManager) {
+                            console.log('🔄 PASO 4: Usando ContentCRUDManager directamente...');
+                            window.contentCRUDManager.loadFromJSON(contentValue);
                         }
-                    }, 200);
+                    }, 300);
                     
                     console.log('✅ Datos de lección cargados correctamente');
                 }, 600); // Esperar más tiempo para asegurar limpieza completa
@@ -213,8 +226,10 @@
             if (contentField) {
                 contentField.value = '[]';
                 
-                // Limpiar formulario de contenido
-                if (window.clearContentForm) {
+                // Limpiar formulario de contenido usando el manager
+                if (window.contentCRUDManager) {
+                    window.contentCRUDManager.clear();
+                } else if (window.clearContentForm) {
                     window.clearContentForm();
                 }
             }
@@ -231,7 +246,10 @@
             
             // Esperar y reinicializar el formulario de contenido
             setTimeout(() => {
-                if (window.jsonToContentArray) {
+                if (window.contentCRUDManager) {
+                    console.log('🔄 Forzando reinicialización con ContentCRUDManager...');
+                    window.contentCRUDManager.clear();
+                } else if (window.jsonToContentArray) {
                     console.log('🔄 Forzando reinicialización del formulario de contenido...');
                     window.jsonToContentArray('[]');
                 }
@@ -305,6 +323,71 @@
                         content_preview: apiResponse.data.content
                     });
                 }
+            }
+        };
+        
+        // =============================
+        // FUNCIONES DE DEBUGGING
+        // =============================
+        
+        window.debugContentForm = function() {
+            console.log('🔍 DEBUG - Estado del formulario de contenido:');
+            
+            const contentField = document.getElementById('content');
+            const container = document.getElementById('content-items-container');
+            
+            console.log('📋 Campo hidden value:', contentField ? contentField.value : 'No encontrado');
+            console.log('📦 Contenedor items:', container ? container.children.length + ' elementos' : 'No encontrado');
+            
+            if (window.contentCRUDManager) {
+                const stats = window.contentCRUDManager.getStats();
+                console.log('📊 Estadísticas del manager:', stats);
+                
+                const data = window.contentCRUDManager.getData();
+                console.log('📝 Datos actuales:', data);
+            }
+            
+            if (window.showToast) {
+                window.showToast('Debug info logged to console', 'info');
+            }
+        };
+        
+        window.loadTestContentData = function() {
+            const testData = [
+                {
+                    "index": 0,
+                    "titulo": "Prueba Debug 1",
+                    "descripcion": "Esta es una descripción de prueba para debugging",
+                    "contenido": "Contenido de prueba para verificar que el CRUD funciona correctamente",
+                    "media": {
+                        "tipo": "image",
+                        "url": "https://picsum.photos/400/300?random=1"
+                    }
+                },
+                {
+                    "index": 1,
+                    "titulo": "Prueba Debug 2",
+                    "descripcion": "Segunda descripción de prueba",
+                    "contenido": "Segundo contenido de prueba con video de YouTube",
+                    "media": {
+                        "tipo": "video",
+                        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    }
+                }
+            ];
+            
+            const jsonString = JSON.stringify(testData);
+            
+            if (window.contentCRUDManager) {
+                window.contentCRUDManager.loadFromJSON(jsonString);
+            } else if (window.jsonToContentArray) {
+                window.jsonToContentArray(jsonString);
+            }
+            
+            console.log('🧪 Datos de prueba cargados:', testData);
+            
+            if (window.showToast) {
+                window.showToast('Datos de prueba cargados correctamente', 'success');
             }
         };
     });

@@ -192,7 +192,15 @@
 			lessonForm.description.value = lesson.description;
 			lessonForm.difficulty.value = lesson.difficulty;
 			lessonForm.time_minutes.value = lesson.time_minutes;
-			lessonForm.content.value = lesson.content ? JSON.stringify(lesson.content, null, 2) : '';
+			
+			// Cargar contenido usando el CRUD manager
+			const contentValue = lesson.content ? JSON.stringify(lesson.content) : '[]';
+			lessonForm.content.value = contentValue;
+			
+			// Cargar contenido en el CRUD form
+			if (typeof window.jsonToContentArray === 'function') {
+				window.jsonToContentArray(contentValue);
+			}
 			
 			const modal = new bootstrap.Modal(document.getElementById('lessonModal'));
 			modal.show();
@@ -218,6 +226,13 @@
 		editingId = null;
 		modalLabel.textContent = 'Nueva lección';
 		lessonForm.reset();
+		
+		// Limpiar el CRUD de contenido
+		if (window.contentCRUDManager) {
+			window.contentCRUDManager.clear();
+		} else if (window.clearContentForm) {
+			window.clearContentForm();
+		}
 	});
 
 	lessonForm.addEventListener('submit', async function(e) {

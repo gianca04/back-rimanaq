@@ -13,8 +13,22 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('web.courses.index') }}">Cursos</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('web.lessons.index') }}">Lecciones</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="lessonsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Lecciones
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="lessonsDropdown">
+                        <li><a class="dropdown-item" href="{{ route('web.lessons.index') }}">
+                            <i class="bi bi-list-ul"></i> Gestionar Lecciones
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('web.lessons.create') }}">
+                            <i class="bi bi-plus-circle"></i> Nueva Lección
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ route('web.lessons.content-demo') }}">
+                            <i class="bi bi-gear"></i> Demo CRUD Contenido
+                        </a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('web.gestures.index') }}">Gestos</a>
