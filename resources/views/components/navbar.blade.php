@@ -21,20 +21,10 @@
                         <li><a class="dropdown-item" href="{{ route('web.lessons.index') }}">
                             <i class="bi bi-list-ul"></i> Gestionar Lecciones
                         </a></li>
-                        <li><a class="dropdown-item" href="{{ route('web.lessons.create') }}">
-                            <i class="bi bi-plus-circle"></i> Nueva Lección
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ route('web.lessons.content-demo') }}">
-                            <i class="bi bi-gear"></i> Demo CRUD Contenido
-                        </a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('web.gestures.index') }}">Gestos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/dashboard/progress">Progreso</a>
                 </li>
             </ul>
             <button id="logoutBtn" class="btn btn-outline-danger ms-auto">Cerrar sesión</button>
